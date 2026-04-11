@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>SD Fitness – Malegaon</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -829,16 +830,72 @@ const OWNER_USER='sdfitness', OWNER_PASS='SDfit@123';
 let currentRole='';
 const PLAN_DAYS={'1-month':30,'3-month':90,'6-month':180,'1-year':365};
 const PLAN_LABELS={'1-month':'1 Month','3-month':'3 Months','6-month':'6 Months','1-year':'1 Year'};
-let members=JSON.parse(localStorage.getItem('sd_members')||'[]');
-let payments=JSON.parse(localStorage.getItem('sd_payments')||'[]');
-let offers=JSON.parse(localStorage.getItem('sd_offers')||'[]');
+
+// ── SUPABASE SETUP ──
+const SB_URL='https://ferssvhybsuolnozjnup.supabase.co';
+const SB_KEY='sb_publishable_Nk_v4rn_t2y4Jn4soTSSEw_uLYrRyVs';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+let members=[];
+let payments=[];
+let offers=[];
+let staffUsers=[];
+let ownerPass=OWNER_PASS;
 let currentFilter='all';
 
-function save(){
-  localStorage.setItem('sd_members',JSON.stringify(members));
-  localStorage.setItem('sd_payments',JSON.stringify(payments));
-  localStorage.setItem('sd_offers',JSON.stringify(offers));
+// ── LOADER ──
+function showLoader(msg){
+  let el=document.getElementById('sb-loader');
+  if(!el){
+    el=document.createElement('div');el.id='sb-loader';
+    el.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(8,8,8,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
+    el.innerHTML='<div id="sb-msg" style="font-family:Bebas Neue,sans-serif;font-size:28px;color:#f5c800;letter-spacing:3px">'+msg+'</div><div style="width:36px;height:36px;border:3px solid #333;border-top-color:#f5c800;border-radius:50%;animation:sbspin 0.7s linear infinite"></div>';
+    const st=document.createElement('style');st.textContent='@keyframes sbspin{to{transform:rotate(360deg)}}';document.head.appendChild(st);
+    document.body.appendChild(el);
+  } else {document.getElementById('sb-msg').textContent=msg;el.style.display='flex';}
 }
+function hideLoader(){const el=document.getElementById('sb-loader');if(el)el.style.display='none';}
+
+// ── LOAD FROM SUPABASE ──
+async function loadFromSupabase(){
+  showLoader('Loading data...');
+  try{
+    const [m,p,o]=await Promise.all([
+      sb.from('members').select('*'),
+      sb.from('payments').select('*'),
+      sb.from('offers').select('*')
+    ]);
+    members=(m.data||[]).map(r=>({id:r.id,name:r.name,phone:r.phone,plan:r.plan,cardio:r.cardio,start:r.start_date,end:r.end_date,gender:r.gender,notes:r.notes,active:r.active,joined:r.joined}));
+    payments=(p.data||[]).map(r=>({id:r.id,memberId:r.member_id,memberName:r.member_name,amount:r.amount,plan:r.plan,cardio:r.cardio,date:r.date}));
+    offers=(o.data||[]).map(r=>({id:r.id,title:r.title,desc:r.description,expiry:r.expiry,added:r.added}));
+  }catch(e){console.error('Load error',e);toast('Connection error — check internet','error');}
+  hideLoader();
+}
+
+async function loadStaffAndSettings(){
+  try{
+    const [su,st]=await Promise.all([sb.from('staff_users').select('*'),sb.from('settings').select('*')]);
+    staffUsers=(su.data||[]).map(r=>({id:r.id,username:r.username,password:r.password,created:r.created,role:r.role}));
+    const op=(st.data||[]).find(s=>s.key==='owner_pass');
+    if(op)ownerPass=op.value;
+  }catch(e){console.error('Staff load error',e);}
+}
+
+// ── SUPABASE SAVE FUNCTIONS ──
+async function saveMemberToDB(m,isNew){
+  const row={id:m.id,name:m.name,phone:m.phone,plan:m.plan,cardio:m.cardio,start_date:m.start,end_date:m.end,gender:m.gender,notes:m.notes,active:m.active,joined:m.joined};
+  if(isNew)await sb.from('members').insert(row);
+  else await sb.from('members').update(row).eq('id',m.id);
+}
+async function deleteFromDB(table,id){await sb.from(table).delete().eq('id',id);}
+async function savePaymentToDB(p){await sb.from('payments').insert({id:p.id,member_id:p.memberId,member_name:p.memberName,amount:p.amount,plan:p.plan,cardio:p.cardio,date:p.date});}
+async function saveOfferToDB(o){await sb.from('offers').insert({id:o.id,title:o.title,description:o.desc,expiry:o.expiry,added:o.added});}
+async function deleteOfferFromDB(id){await sb.from('offers').delete().eq('id',id);}
+async function saveStaffUserToDB(u){await sb.from('staff_users').upsert({id:u.id,username:u.username,password:u.password,created:u.created,role:u.role});}
+async function deleteStaffFromDB(id){await sb.from('staff_users').delete().eq('id',id);}
+async function saveOwnerPassToDB(pass){await sb.from('settings').upsert({key:'owner_pass',value:pass});}
+
+function save(){/* all saves go to Supabase directly */}
 
 // ── MOBILE MENU ──
 function openMobileMenu(){document.getElementById('mobile-menu').classList.add('open');document.body.style.overflow='hidden';}
@@ -848,9 +905,13 @@ function closeMobileMenu(){document.getElementById('mobile-menu').classList.remo
 function openLoginScreen(){document.getElementById('login-screen').classList.add('open');}
 function closeLoginScreen(){document.getElementById('login-screen').classList.remove('open');document.getElementById('login-err').textContent='';}
 
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('login-user').value.trim();
   const p=document.getElementById('login-pass').value.trim();
+  // Load staff and settings first to check credentials
+  showLoader('Signing in...');
+  await loadStaffAndSettings();
+  hideLoader();
   if(u===OWNER_USER&&p===ownerPass){
     currentRole='owner';
   } else if(staffUsers.find(su=>su.username===u&&su.password===p)){
@@ -861,9 +922,9 @@ function doLogin(){
   closeLoginScreen();
   document.getElementById('admin-app').classList.add('open');
   document.body.style.overflow='hidden';
+  await loadFromSupabase();
   applyRoleUI();
   renderAll();
-  // Show FitTech brand only in admin
   document.getElementById('ft-brand').style.display='block';
 }
 
@@ -952,7 +1013,7 @@ document.getElementById('f-start').addEventListener('change',function(){
   document.getElementById('f-end').value=addDays(this.value,PLAN_DAYS[document.getElementById('f-plan').value]);
 });
 
-function saveMember(){
+async function saveMember(){
   const name=document.getElementById('f-name').value.trim();
   const phone=document.getElementById('f-phone').value.trim();
   const plan=document.getElementById('f-plan').value;
@@ -967,15 +1028,18 @@ function saveMember(){
   if(editId){
     if(currentRole==='staff'){toast('Staff cannot edit members','error');return;}
     const idx=members.findIndex(m=>m.id===editId);
-    if(idx>-1)members[idx]={...members[idx],name,phone,plan,cardio,start,end,gender,notes,active:true};
+    if(idx>-1){members[idx]={...members[idx],name,phone,plan,cardio,start,end,gender,notes,active:true};
+      await saveMemberToDB(members[idx],false);}
     toast('Member updated');
   } else {
     const id='m_'+Date.now();
-    members.push({id,name,phone,plan,cardio,start,end,gender,notes,active:true,joined:today()});
-    if(amount>0)payments.push({id:'p_'+Date.now(),memberId:id,memberName:name,amount,plan,cardio,date:today()});
+    const newM={id,name,phone,plan,cardio,start,end,gender,notes,active:true,joined:today()};
+    members.push(newM);
+    await saveMemberToDB(newM,true);
+    if(amount>0){const pay={id:'p_'+Date.now(),memberId:id,memberName:name,amount,plan,cardio,date:today()};payments.push(pay);await savePaymentToDB(pay);}
     toast('Member added');
   }
-  save();closeModal('member-modal');renderAll();
+  closeModal('member-modal');renderAll();
 }
 
 // ── EDIT (owner only) ──
@@ -1027,17 +1091,22 @@ function viewMember(id){
   openModal('view-modal');
 }
 
-function toggleActive(id){
+async function toggleActive(id){
   if(currentRole==='staff'){toast('Only owner can do this','error');return;}
   const m=members.find(x=>x.id===id);if(!m)return;
-  m.active=!m.active;save();renderAll();toast(m.active?'Activated':'Deactivated');
+  m.active=!m.active;
+  await saveMemberToDB(m,false);
+  renderAll();toast(m.active?'Activated':'Deactivated');
 }
-function deleteMember(id){
+async function deleteMember(id){
   if(currentRole==='staff'){toast('Only owner can delete','error');return;}
   if(!confirm('Delete this member?'))return;
+  const memberPayments=payments.filter(p=>p.memberId===id);
   members=members.filter(m=>m.id!==id);
   payments=payments.filter(p=>p.memberId!==id);
-  save();renderAll();toast('Deleted');
+  await deleteFromDB('members',id);
+  for(const p of memberPayments)await deleteFromDB('payments',p.id);
+  renderAll();toast('Deleted');
 }
 
 // ── EXTEND ──
@@ -1048,7 +1117,7 @@ function openExtend(id){
   document.getElementById('ext-start').value=today();
   openModal('extend-modal');
 }
-function extendPlan(){
+async function extendPlan(){
   const id=document.getElementById('extend-id').value;
   const plan=document.getElementById('ext-plan').value;
   const amount=parseFloat(document.getElementById('ext-amount').value)||0;
@@ -1056,8 +1125,9 @@ function extendPlan(){
   const end=addDays(start,PLAN_DAYS[plan]);
   const m=members.find(x=>x.id===id);if(!m)return;
   m.plan=plan;m.start=start;m.end=end;m.active=true;
-  if(amount>0)payments.push({id:'p_'+Date.now(),memberId:id,memberName:m.name,amount,plan,cardio:m.cardio,date:today()});
-  save();closeModal('extend-modal');renderAll();toast('Plan extended');
+  await saveMemberToDB(m,false);
+  if(amount>0){const pay={id:'p_'+Date.now(),memberId:id,memberName:m.name,amount,plan,cardio:m.cardio,date:today()};payments.push(pay);await savePaymentToDB(pay);}
+  closeModal('extend-modal');renderAll();toast('Plan extended');
 }
 
 // ── FILTERS ──
@@ -1124,18 +1194,25 @@ function renderOffers(){
       </div>
     </div>`).join('');
 }
-function saveOffer(){
+async function saveOffer(){
   const title=document.getElementById('o-title').value.trim();
   const desc=document.getElementById('o-desc').value.trim();
   const expiry=document.getElementById('o-expiry').value;
   if(!title){toast('Add offer title','error');return;}
-  offers.push({title,desc,expiry,added:today()});
-  save();closeModal('offer-modal');renderOffers();toast('Offer added ✓');
+  const newOffer={id:'o_'+Date.now(),title,desc,expiry,added:today()};
+  offers.push(newOffer);
+  await saveOfferToDB(newOffer);
+  closeModal('offer-modal');renderOffers();renderPublicOffers();toast('Offer added ✓');
   document.getElementById('o-title').value='';
   document.getElementById('o-desc').value='';
   document.getElementById('o-expiry').value='';
 }
-function deleteOffer(i){offers.splice(i,1);save();renderOffers();toast('Offer removed');}
+async function deleteOffer(i){
+  const id=offers[i].id;
+  offers.splice(i,1);
+  await deleteOfferFromDB(id);
+  renderOffers();renderPublicOffers();toast('Offer removed');
+}
 
 // ── DASHBOARD ──
 function renderDashboard(){
@@ -1202,8 +1279,6 @@ function checkAutoBackup(){
 }
 
 // ── USER MANAGEMENT ──
-let staffUsers=JSON.parse(localStorage.getItem('sd_staff_users')||'[]');
-let ownerPass=localStorage.getItem('sd_owner_pass')||OWNER_PASS;
 
 function renderStaffStatus(){renderStaffUsers();}
 
@@ -1236,14 +1311,15 @@ function togglePw(i,pass){
   el.textContent=el.textContent==='••••••••'?pass:'••••••••';
 }
 
-function createStaffUser(){
+async function createStaffUser(){
   const uname=document.getElementById('new-u-name').value.trim().toLowerCase().replace(/\s+/g,'');
   const upass=document.getElementById('new-u-pass').value.trim();
   if(!uname||!upass){toast('Fill both fields','error');return;}
   if(upass.length<4){toast('Password min 4 characters','error');return;}
   if(staffUsers.find(u=>u.username===uname)){toast('Username already exists','error');return;}
-  staffUsers.push({username:uname,password:upass,created:today(),role:'staff'});
-  localStorage.setItem('sd_staff_users',JSON.stringify(staffUsers));
+  const newUser={id:'su_'+Date.now(),username:uname,password:upass,created:today(),role:'staff'};
+  staffUsers.push(newUser);
+  await saveStaffUserToDB(newUser);
   document.getElementById('new-u-name').value='';
   document.getElementById('new-u-pass').value='';
   closeModal('add-user-modal');
@@ -1257,27 +1333,28 @@ function setupEditUser(i){
   document.getElementById('edit-u-pass').value='';
 }
 
-function updateStaffPass(){
+async function updateStaffPass(){
   const i=parseInt(document.getElementById('edit-u-index').value);
   const np=document.getElementById('edit-u-pass').value.trim();
   if(!np||np.length<4){toast('Password min 4 characters','error');return;}
   staffUsers[i].password=np;
-  localStorage.setItem('sd_staff_users',JSON.stringify(staffUsers));
+  await saveStaffUserToDB(staffUsers[i]);
   closeModal('edit-user-modal');
   renderStaffUsers();
   toast('Password updated ✓');
 }
 
-function deleteStaffUser(i){
+async function deleteStaffUser(i){
   if(!confirm('Delete user "'+staffUsers[i].username+'"?'))return;
+  const uid=staffUsers[i].id;
   staffUsers.splice(i,1);
-  localStorage.setItem('sd_staff_users',JSON.stringify(staffUsers));
+  await deleteStaffFromDB(uid);
   renderStaffUsers();
   toast('User deleted');
 }
 
 // ── OWNER PASSWORD CHANGE ──
-function changeOwnerPass(){
+async function changeOwnerPass(){
   const cur=document.getElementById('owner-cur-pass').value.trim();
   const np=document.getElementById('owner-new-pass').value.trim();
   const cp=document.getElementById('owner-confirm-pass').value.trim();
@@ -1285,7 +1362,7 @@ function changeOwnerPass(){
   if(np.length<6){toast('New password min 6 characters','error');return;}
   if(np!==cp){toast('Passwords do not match','error');return;}
   ownerPass=np;
-  localStorage.setItem('sd_owner_pass',ownerPass);
+  await saveOwnerPassToDB(ownerPass);
   document.getElementById('owner-cur-pass').value='';
   document.getElementById('owner-new-pass').value='';
   document.getElementById('owner-confirm-pass').value='';
