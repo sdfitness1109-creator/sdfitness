@@ -1000,6 +1000,11 @@ async function doLogin(){
   }
   closeLoginScreen();
   document.getElementById('admin-app').classList.add('open');
+  // Lock body scroll on mobile properly
+  const scrollY=window.scrollY;
+  document.body.style.position='fixed';
+  document.body.style.top=`-${scrollY}px`;
+  document.body.style.width='100%';
   document.body.style.overflow='hidden';
   await loadFromSupabase();
   applyRoleUI();
@@ -1031,7 +1036,13 @@ function isRestrictedPage(name){
 
 function doLogout(){
   document.getElementById('admin-app').classList.remove('open');
+  // Restore body scroll
+  const scrollY=document.body.style.top;
+  document.body.style.position='';
+  document.body.style.top='';
+  document.body.style.width='';
   document.body.style.overflow='';
+  window.scrollTo(0,parseInt(scrollY||'0')*-1);
   document.getElementById('ft-brand').style.display='none';
   currentRole='';
 }
@@ -1345,16 +1356,21 @@ function downloadCSV(){
 
 // Auto monthly backup check
 function checkAutoBackup(){
+  const todayDate=today();
+  const dayOfMonth=parseInt(todayDate.split('-')[2]);
+  if(dayOfMonth!==1)return; // only on 1st of month
   const lastBackup=localStorage.getItem('sd_last_backup')||'';
-  const thisMonth=today().slice(0,7);
-  if(lastBackup!==thisMonth&&members.length>0){
-    setTimeout(()=>{
-      if(confirm('Monthly backup due! Download your member data CSV now?')){
-        downloadCSV();
-        localStorage.setItem('sd_last_backup',thisMonth);
-      }
-    },2000);
-  }
+  const thisMonth=todayDate.slice(0,7);
+  if(lastBackup===thisMonth)return; // already done this month
+  if(!members.length)return; // no data to backup
+  setTimeout(()=>{
+    if(confirm('📦 Monthly Backup — 1st of the month!\n\nDownload your member data CSV now? This keeps your data safe.')){
+      downloadCSV();
+      localStorage.setItem('sd_last_backup',thisMonth);
+    } else {
+      // remind next login
+    }
+  },2500);
 }
 
 // ── USER MANAGEMENT ──
