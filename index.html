@@ -295,44 +295,94 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 .toast.error{border-left:3px solid var(--yellow)}
 
 @media(max-width:768px){
+  /* ── CORE FIXES ── */
+  html,body{overflow-x:hidden;width:100%}
+  *{max-width:100%;box-sizing:border-box}
+
+  /* ── NAV ── */
   nav{padding:12px 16px}
-  .nav-links{display:none}
-  .nav-admin-btn{display:none}
-  .nav-cta{display:none}
+  .nav-links,.nav-admin-btn,.nav-cta{display:none}
   .hamburger{display:flex}
-  .hero{padding:80px 20px 60px}
+
+  /* ── HERO ── */
+  .hero{padding:90px 20px 50px;min-height:100svh}
+  .hero-img{width:100%;opacity:.08}
+  .hero-img::after{background:linear-gradient(to top,var(--black) 30%,transparent 100%)}
+  .hero-title{font-size:clamp(52px,16vw,80px);line-height:.92}
+  .hero-sub{font-size:14px;max-width:100%;margin-top:14px}
+  .hero-actions{flex-direction:column;align-items:flex-start;gap:10px;margin-top:24px}
+  .btn-primary,.btn-outline{width:100%;text-align:center;padding:14px 20px;font-size:12px}
   .hero-stats{display:none}
-  section{padding:70px 20px}
-  .about-inner,.location-inner{grid-template-columns:1fr;gap:36px}
-  .plans-grid{grid-template-columns:1fr}
-  .equip-grid{grid-template-columns:1fr 1fr}
-  .equip-item:first-child{grid-column:1/-1}
-  footer{flex-direction:column;text-align:center}
-  .equip-hdr{flex-direction:column;align-items:flex-start;gap:12px}
-  .ngu-banner{flex-direction:column;gap:12px;text-align:center}
+
+  /* ── BANNER ── */
+  .ngu-banner{padding:18px 16px;gap:0;flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .ngu-text{font-size:clamp(14px,4vw,20px);letter-spacing:1px;padding:4px 10px}
+  .ngu-divider{width:1px;height:20px;align-self:center}
+
+  /* ── SECTIONS ── */
+  section{padding:50px 16px}
+  .s-title{font-size:clamp(32px,8vw,48px)}
+
+  /* ── ABOUT ── */
+  .about-inner{grid-template-columns:1fr;gap:28px}
+  .about-imgs{grid-template-columns:1fr 1fr;gap:6px}
+  .about-imgs img:first-child{grid-column:1/-1;aspect-ratio:16/8}
+  .about-imgs img{aspect-ratio:1/1}
+
+  /* ── EQUIPMENT ── */
+  .equip-hdr{flex-direction:column;align-items:flex-start;gap:10px}
+  .equip-grid{grid-template-columns:1fr 1fr;gap:2px}
+  .equip-item:first-child{grid-column:1/-1;aspect-ratio:16/9}
+  .equip-item{aspect-ratio:1/1}
+
+  /* ── PLANS ── */
+  .plans-grid{grid-template-columns:1fr !important;gap:10px}
+  .plan-card{padding:24px 20px}
+  .plan-price{font-size:44px}
+
+  /* ── OFFERS SECTION ── */
+  .offers-section{padding:40px 16px}
+
+  /* ── LOCATION ── */
+  .location-inner{grid-template-columns:1fr;gap:28px}
+  .map-wrap{height:240px}
+
+  /* ── CTA ── */
+  .cta-band{padding:50px 16px}
+  .cta-wa{padding:14px 24px;font-size:12px;width:100%;justify-content:center}
+
+  /* ── FOOTER ── */
+  footer{flex-direction:column;text-align:center;padding:24px 16px;gap:10px}
+  .footer-links{justify-content:center;flex-wrap:wrap}
+
+  /* ── WA FLOAT ── */
+  .wa-float{bottom:80px;right:16px;width:48px;height:48px}
+
+  /* ── ADMIN ── */
   .sidebar{display:none}
   .admin-layout{flex-direction:column}
   .admin-main{flex:1;overflow:hidden;min-height:0}
   .bottom-tabs{display:flex;flex-shrink:0;background:var(--dark);border-top:1px solid var(--border);padding:0;padding-bottom:env(safe-area-inset-bottom)}
   #admin-app.open{height:100vh;height:100dvh}
-  .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;gap:4px;color:var(--muted);cursor:pointer;transition:color .15s;font-size:10px;letter-spacing:.5px;text-transform:uppercase;border:none;background:none;font-family:var(--font-b);position:relative}
+  .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;gap:4px;color:var(--muted);cursor:pointer;transition:color .15s;font-size:9px;letter-spacing:.5px;text-transform:uppercase;border:none;background:none;font-family:var(--font-b);position:relative}
   .tab-item.active{color:var(--yellow)}
   .tab-item svg{width:20px;height:20px}
-  .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
-  .plan-split{grid-template-columns:1fr 1fr}
-  .content{padding:14px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .plan-split{grid-template-columns:1fr 1fr;gap:8px}
+  .content{padding:12px}
   .form-row{grid-template-columns:1fr}
   .member-detail-grid{grid-template-columns:1fr}
   .admin-topbar{padding:12px 14px}
-  .page-title{font-size:20px}
+  .page-title{font-size:18px}
   table th:nth-child(3),table td:nth-child(3),table th:nth-child(4),table td:nth-child(4){display:none}
+  .login-box{width:90%;padding:32px 20px}
 }
 </style>
 </head>
 <body>
 
 <!-- ═══ WEBSITE ═══ -->
-<div id="website">
+<div id="website" style="overflow-x:hidden;width:100%">
 
 <nav>
   <div class="nav-logo">
@@ -737,10 +787,44 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       Expiring
       <span id="expiry-tab-badge" class="tab-badge" style="display:none">0</span>
     </button>
+    <button class="tab-item owner-only" onclick="openMobileMore()">
+      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/></svg>
+      More
+    </button>
     <button class="tab-item" onclick="backToSite()" style="color:#e84040">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3L4 8l5 5"/><line x1="4" y1="8" x2="13" y2="8"/></svg>
       Back
     </button>
+  </div>
+
+  <!-- MOBILE MORE MENU -->
+  <div id="mobile-more" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85)" onclick="closeMobileMore()">
+    <div style="position:absolute;bottom:0;left:0;right:0;background:var(--dark);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px 16px 40px" onclick="event.stopPropagation()">
+      <div style="width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 20px"></div>
+      <div style="font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-b)">More Options</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button onclick="closeMobileMore();showPage('payments',null)" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:var(--font-b);font-size:14px;cursor:pointer;text-align:left;width:100%">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="M1 7h14"/></svg>
+          Payments
+        </button>
+        <button onclick="closeMobileMore();showPage('offers',null)" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:var(--font-b);font-size:14px;cursor:pointer;text-align:left;width:100%">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v2H2zm0 3h12v9H2z"/></svg>
+          Special Offers
+        </button>
+        <button onclick="closeMobileMore();showPage('staff',null)" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:var(--font-b);font-size:14px;cursor:pointer;text-align:left;width:100%">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><circle cx="6" cy="5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5"/><circle cx="12" cy="10" r="3"/><path d="M12 8v2l1 1"/></svg>
+          Staff Users
+        </button>
+        <button onclick="closeMobileMore();downloadCSV()" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid #1db954;border-radius:8px;color:#1db954;font-family:var(--font-b);font-size:14px;cursor:pointer;text-align:left;width:100%">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M2 12h12"/></svg>
+          Backup CSV
+        </button>
+        <button onclick="closeMobileMore();doLogout()" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid #e84040;border-radius:8px;color:#e84040;font-family:var(--font-b);font-size:14px;cursor:pointer;text-align:left;width:100%">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 8H3M6 5l-3 3 3 3"/><path d="M8 3h4a1 1 0 011 1v8a1 1 0 01-1 1H8"/></svg>
+          Log Out
+        </button>
+      </div>
+    </div>
   </div>
 
 </div><!-- end admin-app -->
@@ -893,6 +977,8 @@ function save(){/* all saves go to Supabase directly */}
 // ── MOBILE MENU ──
 function openMobileMenu(){document.getElementById('mobile-menu').classList.add('open');document.body.style.overflow='hidden';}
 function closeMobileMenu(){document.getElementById('mobile-menu').classList.remove('open');document.body.style.overflow='';}
+function openMobileMore(){document.getElementById('mobile-more').style.display='block';}
+function closeMobileMore(){document.getElementById('mobile-more').style.display='none';}
 
 // ── LOGIN ──
 function openLoginScreen(){document.getElementById('login-screen').classList.add('open');}
