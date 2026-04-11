@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SD Fitness – Malegaon</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#080808;--dark:#0f0f0f;--card:#181818;--card2:#1e1e1e;
+  --border:#2a2a2a;--border2:#333;
+  --yellow:#f5c800;--yellow2:#ffd700;--yellow-dim:rgba(245,200,0,.1);
+  --white:#f5f2ee;--muted:#888;
+  --font-d:'Bebas Neue',sans-serif;
+  --font-b:'DM Sans',sans-serif;
+  --r:8px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:var(--font-b);font-weight:300;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(8,8,8,0.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);gap:8px;
+}
+.nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-logo-mb{font-family:var(--font-d);font-size:28px;color:var(--yellow);letter-spacing:1px;line-height:1}
+.nav-logo-text{font-family:var(--font-b);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;line-height:1.4}
+.nav-links{display:flex;gap:24px;list-style:none;flex-shrink:1}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nav-admin-btn{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:8px 14px;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:var(--font-b);transition:all .2s;white-space:nowrap}
+.nav-admin-btn:hover{border-color:var(--yellow);color:var(--yellow)}
+.nav-cta{background:var(--yellow);color:#111;padding:9px 20px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border:none;cursor:pointer;transition:background .2s;white-space:nowrap;flex-shrink:0}
+.nav-cta:hover{background:var(--yellow2)}
+.hamburger{display:flex;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;flex-shrink:0}
+.hamburger span{width:22px;height:2px;background:var(--white);display:block}
+
+/* ── MOBILE MENU ── */
+.mobile-menu{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.97);flex-direction:column;align-items:center;justify-content:center}
+.mobile-menu.open{display:flex}
+.mobile-menu-close{position:absolute;top:20px;right:24px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer}
+.mobile-menu a,.mobile-menu button{font-family:var(--font-d);font-size:40px;letter-spacing:3px;color:var(--muted);text-decoration:none;text-transform:uppercase;background:none;border:none;cursor:pointer;padding:14px 40px;transition:color .2s;display:block;text-align:center;width:100%}
+.mobile-menu a:hover,.mobile-menu button:hover{color:var(--white)}
+.mobile-menu .menu-divider{width:40px;height:1px;background:var(--border);margin:8px auto}
+.mobile-menu .menu-login-btn{color:var(--yellow)!important;font-size:32px!important}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:80px 40px 80px;position:relative;background:var(--black);overflow:hidden;
+}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(120deg,#1a0000 0%,#080808 55%)}
+.hero-img{
+  position:absolute;top:0;right:0;width:58%;height:100%;
+  background:url('img1.png') center/cover no-repeat;opacity:.15
+}
+.hero-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,var(--black) 0%,transparent 60%)}
+.hero-stripe{position:absolute;bottom:0;left:0;right:0;height:4px;background:var(--yellow)}
+.hero-tag{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--yellow);margin-bottom:14px;opacity:0;animation:up .5s .1s forwards}
+.hero-title{font-family:var(--font-d);font-size:clamp(64px,11vw,150px);line-height:.92;letter-spacing:1px;color:var(--white);opacity:0;animation:up .5s .3s forwards}
+.hero-title .red{color:var(--yellow)}
+.hero-title .outline{-webkit-text-stroke:2px var(--white);color:transparent}
+.hero-sub{margin-top:20px;max-width:460px;font-size:15px;line-height:1.7;color:var(--muted);opacity:0;animation:up .5s .5s forwards}
+.hero-actions{margin-top:36px;display:flex;gap:14px;align-items:center;opacity:0;animation:up .5s .7s forwards}
+.btn-primary{background:var(--yellow);color:#111;padding:15px 34px;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;display:inline-block;transition:background .2s,transform .15s;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--yellow2);transform:translateY(-2px)}
+.btn-outline{color:var(--white);border:1px solid var(--border2);padding:15px 34px;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;display:inline-block;transition:all .2s}
+.btn-outline:hover{border-color:var(--yellow);color:var(--yellow)}
+.hero-stats{position:absolute;bottom:80px;right:40px;display:flex;gap:44px;opacity:0;animation:up .5s .9s forwards}
+.h-stat-num{font-family:var(--font-d);font-size:44px;color:var(--yellow);line-height:1}
+.h-stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTIONS ── */
+section{padding:100px 40px}
+.s-tag{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--yellow);margin-bottom:12px}
+.s-title{font-family:var(--font-d);font-size:clamp(40px,6vw,72px);line-height:1;letter-spacing:1px;margin-bottom:20px}
+.s-body{font-size:15px;line-height:1.8;color:var(--muted);max-width:500px}
+.divider{width:40px;height:3px;background:var(--yellow);margin-bottom:28px}
+
+/* ── NEVER GIVE UP BANNER ── */
+.ngu-banner{
+  background:var(--yellow);padding:28px 40px;
+  display:flex;align-items:center;justify-content:center;gap:24px;
+}
+.ngu-text{font-family:var(--font-d);font-size:clamp(28px,5vw,56px);letter-spacing:3px;color:var(--white)}
+.ngu-divider{width:2px;height:48px;background:rgba(255,255,255,.3)}
+
+/* ── ABOUT ── */
+.about{background:var(--dark)}
+.about-inner{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;max-width:1200px;margin:0 auto}
+.about-imgs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.about-imgs img{width:100%;aspect-ratio:1/1;object-fit:cover;filter:grayscale(30%);transition:filter .3s,transform .3s}
+.about-imgs img:hover{filter:grayscale(0);transform:scale(1.03)}
+.about-imgs img:first-child{grid-column:1/-1;aspect-ratio:16/9}
+
+/* ── EQUIPMENT ── */
+.equipment{background:var(--black)}
+.equip-hdr{max-width:1200px;margin:0 auto 50px;display:flex;justify-content:space-between;align-items:flex-end}
+.equip-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.equip-item{position:relative;overflow:hidden;aspect-ratio:4/3;background:var(--card)}
+.equip-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s,opacity .3s;opacity:.7}
+.equip-item:hover img{transform:scale(1.07);opacity:1}
+.equip-item:first-child{grid-column:span 2;aspect-ratio:unset}
+.equip-label{position:absolute;bottom:0;left:0;right:0;padding:36px 18px 14px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--white)}
+
+/* ── PLANS ── */
+.plans{background:var(--dark)}
+.plans-inner{max-width:1200px;margin:0 auto}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:50px}
+.plan-card{background:var(--card);border:1px solid var(--border);padding:36px 28px;transition:border-color .2s;position:relative}
+.plan-card:hover{border-color:var(--yellow)}
+.plan-card.featured{border-color:var(--yellow);background:#17150a}
+.plan-card.featured::before{content:'BEST VALUE';position:absolute;top:14px;right:14px;font-size:9px;letter-spacing:2px;background:var(--yellow);color:var(--white);padding:3px 8px;font-weight:600}
+.plan-name{font-family:var(--font-d);font-size:28px;letter-spacing:2px;color:var(--white)}
+.plan-price{font-family:var(--font-d);font-size:56px;color:var(--yellow);line-height:1;margin:16px 0 4px}
+.plan-price span{font-size:20px;color:var(--muted)}
+.plan-dur{font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:28px}
+.plan-feats{list-style:none}
+.plan-feats li{font-size:13px;color:var(--muted);padding:9px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.plan-feats li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0}
+.plan-feats li:last-child{border-bottom:none}
+.plan-btn{display:block;text-align:center;margin-top:28px;padding:13px;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;border:1px solid var(--border);color:var(--white);transition:all .2s;font-family:var(--font-b)}
+.plan-card.featured .plan-btn{background:var(--yellow);border-color:var(--yellow);color:#111;font-weight:600}
+.plan-btn:hover{background:var(--yellow);border-color:var(--yellow);color:var(--white)}
+.plan-note{font-size:11px;color:var(--muted);margin-top:18px;text-align:center}
+
+/* ── LOCATION ── */
+.location{background:var(--black)}
+.location-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:start}
+.info-block{margin-bottom:32px}
+.info-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--yellow);margin-bottom:8px}
+.info-value{font-size:15px;line-height:1.7;color:var(--white)}
+.map-wrap{width:100%;height:340px;border:1px solid var(--border);overflow:hidden}
+.map-wrap iframe{width:100%;height:100%;border:none;filter:grayscale(80%) invert(10%)}
+
+/* ── CTA ── */
+.cta-band{background:var(--yellow);padding:70px 40px;text-align:center}
+.cta-band h2{font-family:var(--font-d);font-size:clamp(36px,6vw,72px);color:var(--white);line-height:1;margin-bottom:10px}
+.cta-band p{font-size:15px;color:rgba(255,255,255,.7);margin-bottom:32px}
+.cta-wa{display:inline-flex;align-items:center;gap:10px;background:var(--black);color:var(--white);padding:15px 36px;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:background .2s}
+.cta-wa:hover{background:#111}
+
+/* ── FOOTER ── */
+footer{background:var(--dark);padding:36px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.footer-logo{font-family:var(--font-d);font-size:20px;color:var(--yellow);letter-spacing:2px}
+.footer-copy{font-size:11px;color:var(--muted)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:1px;text-transform:uppercase}
+.footer-links a:hover{color:var(--yellow)}
+
+/* ── WA FLOAT ── */
+.wa-float{position:fixed;bottom:26px;right:26px;z-index:200;width:54px;height:54px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.4);text-decoration:none;transition:transform .2s}
+.wa-float:hover{transform:scale(1.1)}
+.wa-float svg{width:26px;height:26px;fill:white}
+
+/* ── ADMIN LOGIN ── */
+#login-screen{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(0,0,0,.95);backdrop-filter:blur(8px)}
+#login-screen.open{display:flex}
+.login-box{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:44px 36px;width:340px;text-align:center;position:relative}
+.login-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.login-close:hover{color:var(--yellow)}
+.login-logo{font-family:var(--font-d);font-size:24px;color:var(--yellow);letter-spacing:2px;margin-bottom:4px}
+.login-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px}
+.login-box input{width:100%;background:var(--dark);border:1px solid var(--border2);color:var(--white);padding:11px 14px;border-radius:5px;font-family:var(--font-b);font-size:13px;margin-bottom:10px;outline:none;transition:border-color .2s}
+.login-box input:focus{border-color:var(--yellow)}
+.login-btn{width:100%;background:var(--yellow);color:var(--white);border:none;padding:12px;border-radius:5px;font-family:var(--font-b);font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:background .2s}
+.login-btn:hover{background:var(--yellow2)}
+.login-err{color:var(--yellow2);font-size:11px;margin-top:8px;min-height:16px}
+
+/* ── ADMIN APP ── */
+#admin-app{display:none;position:fixed;inset:0;z-index:400;background:var(--black);overflow:hidden}
+#admin-app.open{display:flex;flex-direction:column}
+.admin-topbar{background:var(--dark);border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
+.admin-layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:220px;background:var(--dark);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-logo{padding:18px 18px 14px;font-family:var(--font-d);font-size:18px;color:var(--yellow);letter-spacing:2px;border-bottom:1px solid var(--border)}
+.sidebar-logo span{display:block;font-family:var(--font-b);font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:13px 18px;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent;font-size:13px}
+.nav-item:hover{color:var(--white);background:rgba(255,255,255,.03)}
+.nav-item.active{color:var(--yellow);border-left-color:var(--yellow);background:rgba(245,200,0,.07)}
+.nav-icon{width:15px;height:15px;opacity:.7;flex-shrink:0}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-bottom{margin-top:auto;padding:14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px}
+.logout-btn,.back-site-btn{width:100%;background:transparent;border:1px solid var(--border2);color:var(--muted);padding:9px;border-radius:5px;font-family:var(--font-b);font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all .2s}
+.logout-btn:hover{border-color:var(--yellow);color:var(--yellow)}
+.back-site-btn:hover{border-color:var(--white);color:var(--white)}
+.admin-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.page-title{font-family:var(--font-d);font-size:24px;letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.notif-badge{background:var(--yellow);color:#fff;font-size:10px;padding:2px 6px;border-radius:20px;font-weight:600}
+.content{padding:20px;flex:1;overflow-y:auto}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.stat-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.stat-num{font-family:var(--font-d);font-size:38px;line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.stat-card.red .stat-num{color:var(--yellow)}
+.stat-card.green .stat-num{color:#1db954}
+.stat-card.orange .stat-num{color:#e84040}
+.stat-card.blue .stat-num{color:#3b82f6}
+.plan-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.plan-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.plan-box-title{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.plan-box-num{font-family:var(--font-d);font-size:44px;color:var(--yellow);line-height:1}
+.plan-box-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── EXPIRY ── */
+.expiry-section{margin-bottom:20px}
+.a-section-title{font-family:var(--font-d);font-size:20px;letter-spacing:1px;margin-bottom:12px}
+.expiry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.expiry-card{background:var(--card);border-radius:var(--r);padding:14px;display:flex;align-items:center;justify-content:space-between;border-left:3px solid var(--yellow)}
+.expiry-card.warn{border-left-color:#e89020}
+.expiry-name{font-size:13px;font-weight:600;margin-bottom:3px}
+.expiry-info{font-size:11px;color:var(--muted)}
+.expiry-days{font-family:var(--font-d);font-size:30px;line-height:1;color:var(--yellow);text-align:right}
+.expiry-card.warn .expiry-days{color:#e89020}
+.expiry-days span{display:block;font-family:var(--font-b);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.search-box{background:var(--dark);border:1px solid var(--border2);color:var(--white);padding:8px 12px;border-radius:5px;font-family:var(--font-b);font-size:12px;outline:none;width:200px;transition:border-color .2s}
+.search-box:focus{border-color:var(--yellow)}
+.filter-btns{display:flex;gap:5px;flex-wrap:wrap}
+.filter-btn{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:6px 12px;border-radius:5px;font-size:11px;cursor:pointer;transition:all .15s;font-family:var(--font-b)}
+.filter-btn:hover,.filter-btn.active{background:var(--yellow);border-color:var(--yellow);color:#111;font-weight:600}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--dark)}
+th{padding:10px 14px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:400;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:12px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:3px 8px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+.badge-green{background:#0a1f10;color:#1db954}
+.badge-red{background:#1f0a0a;color:#e84040}
+.badge-amber{background:#1f1508;color:#e89020}
+.badge-blue{background:#0a1020;color:#3b82f6}
+.badge-dot{width:4px;height:4px;border-radius:50%;background:currentColor}
+.action-btns{display:flex;flex-direction:column;gap:4px}
+.act-btn{background:var(--card2);border:1px solid var(--border2);color:var(--muted);padding:5px 10px;border-radius:4px;font-size:10px;cursor:pointer;transition:all .15s;font-family:var(--font-b);text-align:left;white-space:nowrap}
+.act-btn:hover{border-color:var(--yellow);color:var(--yellow)}
+.act-btn.success:hover{border-color:#1db954;color:#1db954}
+.act-btn.danger:hover{border-color:#e84040;color:#e84040}
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted);font-size:13px}
+.add-btn{background:var(--yellow);color:var(--white);border:none;padding:9px 18px;border-radius:5px;font-family:var(--font-b);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;letter-spacing:.5px;transition:background .2s}
+.add-btn:hover{background:var(--yellow2)}
+
+/* ── MODALS ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--card);z-index:2}
+.modal-title{font-family:var(--font-d);font-size:20px;letter-spacing:1px}
+.close-btn{background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+.close-btn:hover{color:var(--yellow)}
+.modal-body{padding:20px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.form-input,.form-select{background:var(--dark);border:1px solid var(--border2);color:var(--white);padding:10px 12px;border-radius:5px;font-family:var(--font-b);font-size:12px;outline:none;transition:border-color .2s;width:100%}
+.form-input:focus,.form-select:focus{border-color:var(--yellow)}
+.form-select option{background:var(--dark)}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.btn-save{background:var(--yellow);color:var(--white);border:none;padding:10px 24px;border-radius:5px;font-family:var(--font-b);font-size:12px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-save:hover{background:var(--yellow2)}
+.btn-cancel{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:10px 18px;border-radius:5px;font-family:var(--font-b);font-size:12px;cursor:pointer;transition:all .2s}
+.btn-cancel:hover{border-color:var(--white);color:var(--white)}
+.pay-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.pay-item:last-child{border-bottom:none}
+.pay-date{font-size:11px;color:var(--muted)}
+.pay-plan{font-size:10px;padding:2px 7px;border-radius:10px;background:#0a1020;color:#3b82f6}
+.member-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.detail-label{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.detail-value{font-size:13px;color:var(--white)}
+
+/* ── BOTTOM TABS (mobile) ── */
+.bottom-tabs{display:none}
+.tab-badge{position:absolute;top:6px;right:calc(50% - 18px);background:var(--yellow);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;z-index:700;background:var(--card2);border:1px solid var(--border2);color:var(--white);padding:11px 18px;border-radius:7px;font-size:12px;display:flex;align-items:center;gap:7px;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left:3px solid #1db954}
+.toast.error{border-left:3px solid var(--yellow)}
+
+@media(max-width:768px){
+  nav{padding:12px 16px}
+  .nav-links{display:none}
+  .nav-admin-btn{display:none}
+  .nav-cta{display:none}
+  .hamburger{display:flex}
+  .hero{padding:80px 20px 60px}
+  .hero-stats{display:none}
+  section{padding:70px 20px}
+  .about-inner,.location-inner{grid-template-columns:1fr;gap:36px}
+  .plans-grid{grid-template-columns:1fr}
+  .equip-grid{grid-template-columns:1fr 1fr}
+  .equip-item:first-child{grid-column:1/-1}
+  footer{flex-direction:column;text-align:center}
+  .equip-hdr{flex-direction:column;align-items:flex-start;gap:12px}
+  .ngu-banner{flex-direction:column;gap:12px;text-align:center}
+  .sidebar{display:none}
+  .admin-layout{flex-direction:column}
+  .admin-main{flex:1;overflow:hidden}
+  .bottom-tabs{display:flex;flex-shrink:0;background:var(--dark);border-top:1px solid var(--border);padding:0}
+  .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;gap:4px;color:var(--muted);cursor:pointer;transition:color .15s;font-size:10px;letter-spacing:.5px;text-transform:uppercase;border:none;background:none;font-family:var(--font-b);position:relative}
+  .tab-item.active{color:var(--yellow)}
+  .tab-item svg{width:20px;height:20px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .plan-split{grid-template-columns:1fr 1fr}
+  .content{padding:14px}
+  .form-row{grid-template-columns:1fr}
+  .member-detail-grid{grid-template-columns:1fr}
+  .admin-topbar{padding:12px 14px}
+  .page-title{font-size:20px}
+  table th:nth-child(3),table td:nth-child(3),table th:nth-child(4),table td:nth-child(4){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ WEBSITE ═══ -->
+<div id="website">
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-mb" style="letter-spacing:3px;font-size:26px">SD</div>
+    <div class="nav-logo-text">Fitness · Malegaon</div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#equipment">Equipment</a></li>
+    <li><a href="#plans">Plans</a></li>
+    <li><a href="#location">Location</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-admin-btn" onclick="openLoginScreen()">Admin</button>
+    <a href="https://wa.me/919923871089" class="nav-cta" target="_blank">Join Now</a>
+    <button class="hamburger" onclick="openMobileMenu()"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+  <a href="#about" onclick="closeMobileMenu()">About</a>
+  <a href="#equipment" onclick="closeMobileMenu()">Equipment</a>
+  <a href="#plans" onclick="closeMobileMenu()">Plans</a>
+  <a href="#location" onclick="closeMobileMenu()">Location</a>
+  <div class="menu-divider"></div>
+  <button class="menu-login-btn" onclick="closeMobileMenu();openLoginScreen()">Admin Login</button>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-img"></div>
+  <div class="hero-stripe"></div>
+  <div style="position:relative;z-index:2">
+    <p class="hero-tag">AC Gym · Gents & Ladies · Malegaon</p>
+    <h1 class="hero-title">
+      SD<br>
+      <span class="red">FITNESS</span><br>
+      <span class="outline">MALEGAON</span>
+    </h1>
+    <p class="hero-sub">SD Fitness — AC gym with modern equipment, trained teachers, and programs for weight loss, weight gain and body building. For gents and ladies both.</p>
+    <div class="hero-actions">
+      <a href="#plans" class="btn-primary">View Plans</a>
+      <a href="#equipment" class="btn-outline">Our Equipment</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div><div class="h-stat-num">4.6★</div><div class="h-stat-label">Google Rating</div></div>
+    <div><div class="h-stat-num">AC</div><div class="h-stat-label">Air Conditioned</div></div>
+    <div><div class="h-stat-num">2in1</div><div class="h-stat-label">Gents & Ladies</div></div>
+  </div>
+</section>
+
+<!-- SD FITNESS BANNER -->
+<div class="ngu-banner">
+  <div class="ngu-text">SD FITNESS</div>
+  <div class="ngu-divider"></div>
+  <div class="ngu-text">AC GYM</div>
+  <div class="ngu-divider"></div>
+  <div class="ngu-text">GENTS & LADIES</div>
+  <div class="ngu-divider"></div>
+  <div class="ngu-text">MALEGAON</div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-imgs">
+      <img src="img1.png" alt="SD Fitness dumbbell rack"/>
+      <img src="img3.png" alt="SD Fitness cardio zone"/>
+      <img src="img2.png" alt="SD Fitness strength zone"/>
+    </div>
+    <div>
+      <p class="s-tag">Who We Are</p>
+      <div class="divider"></div>
+      <h2 class="s-title">MODERN GYM<br>FOR GENTS<br>& LADIES</h2>
+      <p class="s-body">SD Fitness is Malegaon's fully air-conditioned gym — with trained teachers, modern equipment and specialized programs for weight loss, weight gain and building the perfect physique.</p>
+      <p class="s-body" style="margin-top:14px">Located at Pushpatai Hire Nagar, near Bhosale Petrol Pump, Nampur Road Camp, Malegaon. Open from 5 PM daily.</p>
+      <a href="https://wa.me/919923871089" class="btn-primary" style="margin-top:32px;display:inline-block;color:#111" target="_blank">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- EQUIPMENT -->
+<section class="equipment" id="equipment">
+  <div class="equip-hdr">
+    <div>
+      <p class="s-tag">What We Have</p>
+      <div class="divider"></div>
+      <h2 class="s-title">MODERN<br>EQUIPMENT</h2>
+    </div>
+    <p style="color:var(--muted);font-size:14px;max-width:280px;text-align:right">AC gym with treadmills, free weights, cable machines and full strength zone.</p>
+  </div>
+  <div class="equip-grid">
+    <div class="equip-item"><img src="img1.png" alt="SD Fitness dumbbell rack"/><div class="equip-label">Free Weights</div></div>
+    <div class="equip-item"><img src="img3.png" alt="SD Fitness cardio zone"/><div class="equip-label">Cardio Zone</div></div>
+    <div class="equip-item"><img src="img2.png" alt="SD Fitness strength zone"/><div class="equip-label">Strength Zone</div></div>
+    <div class="equip-item"><img src="img4.png" alt="SD Fitness poster"/><div class="equip-label">Expert Training</div></div>
+  </div>
+</section>
+
+<!-- SPECIAL OFFERS (dynamic from admin) -->
+<section class="offers-section" id="offers-public" style="background:var(--dark);padding:60px 40px;display:none">
+  <div style="max-width:1100px;margin:0 auto">
+    <p class="s-tag">Limited Time</p>
+    <div class="divider"></div>
+    <h2 class="s-title" style="margin-bottom:32px">SPECIAL<br>OFFERS</h2>
+    <div id="public-offers-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="plans" id="plans">
+  <div class="plans-inner">
+    <p class="s-tag">Membership</p>
+    <div class="divider"></div>
+    <h2 class="s-title">CHOOSE YOUR<br>PLAN</h2>
+    <p class="s-body">Flexible plans for every goal. AC gym with trained teachers. Ladies get 25% discount on Gym fees!</p>
+    <div class="plans-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="plan-card">
+        <div class="plan-name">1 MONTH</div>
+        <div class="plan-price"><span>₹</span>1,000</div>
+        <div class="plan-dur">Gym only</div>
+        <ul class="plan-feats">
+          <li>Full gym access</li>
+          <li>+ Cardio ₹300</li>
+          <li>Trained teacher</li>
+          <li>AC facility</li>
+        </ul>
+        <a href="https://wa.me/919923871089" class="plan-btn" target="_blank">Join Now</a>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-name">3 MONTHS</div>
+        <div class="plan-price"><span>₹</span>2,500</div>
+        <div class="plan-dur">Gym only — best value</div>
+        <ul class="plan-feats">
+          <li>Full gym access</li>
+          <li>+ Cardio ₹800</li>
+          <li>Trained teacher</li>
+          <li>AC facility</li>
+          <li>Diet guidance</li>
+        </ul>
+        <a href="https://wa.me/919923871089" class="plan-btn" target="_blank">Join Now</a>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">6 MONTHS</div>
+        <div class="plan-price"><span>₹</span>4,500</div>
+        <div class="plan-dur">Gym only</div>
+        <ul class="plan-feats">
+          <li>Full gym access</li>
+          <li>+ Cardio ₹1,500</li>
+          <li>Trained teacher</li>
+          <li>AC facility</li>
+          <li>Personalised diet</li>
+        </ul>
+        <a href="https://wa.me/919923871089" class="plan-btn" target="_blank">Join Now</a>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">1 YEAR</div>
+        <div class="plan-price"><span>₹</span>8,000</div>
+        <div class="plan-dur">Gym only — max savings</div>
+        <ul class="plan-feats">
+          <li>Full gym access</li>
+          <li>+ Cardio ₹2,500</li>
+          <li>Trained teacher</li>
+          <li>AC facility</li>
+          <li>Full diet program</li>
+        </ul>
+        <a href="https://wa.me/919923871089" class="plan-btn" target="_blank">Join Now</a>
+      </div>
+    </div>
+    <p class="plan-note" style="margin-top:18px;font-size:13px;color:var(--muted);text-align:center">🎀 Ladies get <strong style="color:var(--yellow)">25% discount</strong> on Gym fees · Cardio plans optional add-on</p>
+  </div>
+</section>
+
+<!-- LOCATION -->
+<section class="location" id="location">
+  <div class="location-inner">
+    <div>
+      <p class="s-tag">Find Us</p>
+      <div class="divider"></div>
+      <h2 class="s-title">VISIT US<br>TODAY</h2>
+      <div class="info-block">
+        <p class="info-label">Address</p>
+        <p class="info-value">SD Fitness,<br>Pushpatai Hire Nagar,<br>Near Bhosale Petrol Pump,<br>Nampur Road Camp, Malegaon 423105</p>
+      </div>
+      <div class="info-block">
+        <p class="info-label">Phone / WhatsApp</p>
+        <p class="info-value"><a href="tel:+919923871089" style="color:var(--yellow);text-decoration:none">+91 99238 71089</a></p>
+      </div>
+      <div class="info-block">
+        <p class="info-label">Hours</p>
+        <p class="info-value">Monday – Sunday: 5:00 PM – 10:00 PM</p>
+      </div>
+      <a href="https://maps.google.com/?q=SD+Fitness+Malegaon+Nampur+Road" class="btn-primary" target="_blank" style="display:inline-block">Get Directions</a>
+    </div>
+    <div>
+      <div class="map-wrap">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3721!2d74.5302!3d20.5595!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjDCsDMzJzM0LjIiTiA3NMKwMzEnNDguNyJF!5e0!3m2!1sen!2sin!4v1" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="SD Fitness location"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-band">
+  <h2>TRANSFORM<br>YOUR BODY.</h2>
+  <p>Message us on WhatsApp — we'll guide you to the right plan</p>
+  <a href="https://wa.me/919923871089" class="cta-wa" target="_blank">
+    <svg style="width:18px;height:18px;fill:white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    Chat on WhatsApp
+  </a>
+</div>
+
+<footer>
+  <div class="footer-logo">SD FITNESS</div>
+  <p class="footer-copy">© 2026 SD Fitness, Malegaon. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="#home">Home</a><a href="#equipment">Equipment</a><a href="#plans">Plans</a><a href="#location">Location</a>
+  </div>
+</footer>
+
+<a href="https://wa.me/919923871089" class="wa-float" target="_blank">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+</a>
+
+</div><!-- end #website -->
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <button class="login-close" onclick="closeLoginScreen()">✕</button>
+    <div class="login-logo">SD FITNESS</div>
+    <div class="login-sub">Admin Login</div>
+    <input type="text" id="login-user" placeholder="Username" autocomplete="username"/>
+    <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password"/>
+    <button class="login-btn" onclick="doLogin()">ENTER</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN APP ═══ -->
+<div id="admin-app">
+
+  <div class="admin-topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="page-title" id="page-title">Dashboard</div>
+      <span id="topbar-expiry" style="font-size:11px;color:var(--yellow);display:none"></span>
+    </div>
+    <div class="topbar-right">
+      <button class="add-btn" onclick="openAddMember()">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="1" x2="7" y2="13"/><line x1="1" y1="7" x2="13" y2="7"/></svg>
+        Add Member
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-layout">
+
+    <div class="sidebar">
+      <div class="sidebar-logo">SD FITNESS<span>Admin Panel · <span id="role-label">Owner</span></span></div>
+      <nav style="flex:1;padding-top:6px">
+        <div class="nav-item active" onclick="showPage('dashboard',this)">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+          Dashboard
+        </div>
+        <div class="nav-item" onclick="showPage('members',this)">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+          Members
+        </div>
+        <div class="nav-item" onclick="showPage('payments',this)">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="M1 7h14"/></svg>
+          Payments
+        </div>
+        <div class="nav-item owner-only" id="offers-nav" onclick="showPage('offers',this)">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v2H2zm0 3h12v9H2z"/></svg>Offers
+        </div>
+        <div class="nav-item owner-only" onclick="showPage('staff',this)">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="6" cy="5" r="3"/><path d="M1 13c0-2.8 2.2-5 5-5"/><circle cx="12" cy="10" r="3"/><path d="M12 8v2l1 1"/></svg>Staff Access
+        </div>
+        <div class="nav-item" onclick="showPage('expiring',this)">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          Expiring Soon
+          <span id="expiry-nav-badge" class="notif-badge" style="margin-left:auto;display:none">0</span>
+        </div>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="add-btn" onclick="openAddMember()" style="width:100%;justify-content:center;margin-bottom:8px;padding:13px;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="1" x2="7" y2="13"/><line x1="1" y1="7" x2="13" y2="7"/></svg>
+          Add Member
+        </button>
+        <button class="back-site-btn owner-only" onclick="downloadCSV()" style="border-color:#1db954;color:#1db954">↓ Backup CSV</button>
+        <button class="back-site-btn" onclick="backToSite()">← Back to Website</button>
+        <button class="logout-btn" onclick="doLogout()">Log Out</button>
+      </div>
+    </div>
+
+    <div class="admin-main">
+      <div class="content">
+
+        <div id="page-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card red"><div class="stat-label">Total Members</div><div class="stat-num" id="stat-total">0</div><div class="stat-sub">All time</div></div>
+            <div class="stat-card green"><div class="stat-label">Active</div><div class="stat-num" id="stat-active">0</div><div class="stat-sub">Currently active</div></div>
+            <div class="stat-card orange"><div class="stat-label">Expired / Inactive</div><div class="stat-num" id="stat-inactive">0</div><div class="stat-sub">Need renewal</div></div>
+            <div class="stat-card blue"><div class="stat-label">Expiring Soon</div><div class="stat-num" id="stat-expiring">0</div><div class="stat-sub">Within 5 days</div></div>
+          </div>
+          <div class="plan-split">
+            <div class="plan-box"><div class="plan-box-title">Cardio Members</div><div class="plan-box-num" id="stat-cardio">0</div><div class="plan-box-sub">Active cardio plan</div></div>
+            <div class="plan-box"><div class="plan-box-title">Non-Cardio Members</div><div class="plan-box-num" id="stat-noncardio">0</div><div class="plan-box-sub">Active non-cardio plan</div></div>
+          </div>
+          <div class="expiry-section">
+            <div class="a-section-title">Expiring This Week</div>
+            <div class="expiry-grid" id="expiry-cards"><div style="color:var(--muted);font-size:12px">No members expiring soon.</div></div>
+          </div>
+        </div>
+
+        <div id="page-members" style="display:none">
+          <div class="table-wrap">
+            <div class="table-header">
+              <input class="search-box" type="search" placeholder="Search name or phone..." oninput="renderTable()" id="search-input"/>
+              <div class="filter-btns">
+                <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+                <button class="filter-btn" onclick="setFilter('active',this)">Active</button>
+                <button class="filter-btn" onclick="setFilter('inactive',this)">Inactive</button>
+                <button class="filter-btn" onclick="setFilter('cardio',this)">Cardio</button>
+                <button class="filter-btn" onclick="setFilter('non-cardio',this)">Non-Cardio</button>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table><thead><tr><th>Name</th><th>Plan</th><th>Type</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="members-tbody"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-payments" style="display:none">
+          <div class="table-wrap">
+            <div class="table-header"><div class="a-section-title" style="font-size:18px">All Payments</div></div>
+            <div style="overflow-x:auto">
+              <table><thead><tr><th>Member</th><th>Amount</th><th>Plan</th><th>Type</th><th>Date</th></tr></thead>
+              <tbody id="payments-tbody"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-offers" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div class="a-section-title">Active Offers</div>
+            <button class="add-btn" onclick="openModal('offer-modal')" style="width:auto;padding:9px 16px">+ Add Offer</button>
+          </div>
+          <div id="offers-list"></div>
+        </div>
+        <div id="page-expiring" style="display:none">
+          <div class="expiry-grid" id="expiry-grid-full" style="gap:12px"></div>
+        </div>
+
+        <div id="page-staff" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div class="a-section-title">Staff Users</div>
+            <button class="add-btn" onclick="openModal('add-user-modal')" style="width:auto;padding:9px 16px">+ Create User</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.7">Staff can only: Add members · View members · Send WhatsApp reminders · Extend plans.<br>Staff cannot: Delete · Deactivate · Edit · See offers or staff settings.</p>
+          <div id="staff-users-list"></div>
+
+          <!-- OWNER PASSWORD CHANGE -->
+          <div style="margin-top:32px;border-top:1px solid var(--border);padding-top:24px">
+            <div class="a-section-title" style="font-size:18px;margin-bottom:14px">Change Your (Owner) Password</div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;max-width:420px">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" id="owner-cur-pass" type="password" placeholder="Enter current password"/></div>
+                <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="owner-new-pass" type="text" placeholder="Min 6 characters"/></div>
+                <div class="form-group"><label class="form-label">Confirm New Password</label><input class="form-input" id="owner-confirm-pass" type="text" placeholder="Repeat new password"/></div>
+                <button class="btn-save" style="width:100%;margin-top:4px" onclick="changeOwnerPass()">Update My Password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MOBILE BOTTOM TABS -->
+  <div class="bottom-tabs">
+    <button class="tab-item active" id="tab-dashboard" onclick="showPage('dashboard',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Home
+    </button>
+    <button class="tab-item" id="tab-members" onclick="showPage('members',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+      Members
+    </button>
+    <button class="tab-item" onclick="openAddMember()" style="color:var(--yellow)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="7"/><line x1="8" y1="4" x2="8" y2="12"/><line x1="4" y1="8" x2="12" y2="8"/></svg>
+      Add
+    </button>
+    <button class="tab-item" id="tab-payments" onclick="showPage('payments',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="M1 7h14"/></svg>
+      Payments
+    </button>
+    <button class="tab-item owner-only" id="tab-offers" onclick="showPage('offers',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v2H2zm0 3h12v9H2z"/></svg>
+      Offers
+    </button>
+    <button class="tab-item" id="tab-expiring" onclick="showPage('expiring',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      Expiring
+      <span id="expiry-tab-badge" class="tab-badge" style="display:none">0</span>
+    </button>
+    <button class="tab-item" onclick="backToSite()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3L5 8l5 5"/><line x1="5" y1="8" x2="14" y2="8"/></svg>
+      Back
+    </button>
+  </div>
+
+</div><!-- end admin-app -->
+
+<!-- MODALS -->
+<div class="overlay" id="member-modal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="modal-title">Add Member</div><button class="close-btn" onclick="closeModal('member-modal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id"/>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="f-name" placeholder="e.g. Rahul Sharma"/></div>
+        <div class="form-group"><label class="form-label">Phone *</label><input class="form-input" id="f-phone" placeholder="10-digit" maxlength="10"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Plan *</label>
+          <select class="form-select" id="f-plan">
+            <option value="1-month">1 Month</option>
+            <option value="3-month">3 Months</option>
+            <option value="6-month">6 Months</option>
+            <option value="1-year">1 Year</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Type *</label>
+          <select class="form-select" id="f-cardio">
+            <option value="non-cardio">Non-Cardio</option>
+            <option value="cardio">Cardio</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Start Date *</label><input class="form-input" type="date" id="f-start"/></div>
+        <div class="form-group"><label class="form-label">End Date (auto)</label><input class="form-input" type="date" id="f-end" readonly style="opacity:.5"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Amount Paid (₹)</label><input class="form-input" id="f-amount" type="number" placeholder="e.g. 1000"/></div>
+        <div class="form-group"><label class="form-label">Gender</label>
+          <select class="form-select" id="f-gender"><option>Male</option><option>Female</option><option>Other</option></select>
+        </div>
+      </div>
+      <div class="form-row full"><div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="f-notes" placeholder="Optional notes"/></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn-cancel" onclick="closeModal('member-modal')">Cancel</button><button class="btn-save" onclick="saveMember()">Save Member</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="view-modal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="view-name">Member</div><button class="close-btn" onclick="closeModal('view-modal')">✕</button></div>
+    <div class="modal-body" id="view-body"></div>
+  </div>
+</div>
+
+<div class="overlay" id="extend-modal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head"><div class="modal-title">Extend Plan</div><button class="close-btn" onclick="closeModal('extend-modal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="extend-id"/>
+      <div class="form-group" style="margin-bottom:12px"><label class="form-label">New Plan</label>
+        <select class="form-select" id="ext-plan"><option value="1-month">1 Month</option><option value="3-month">3 Months</option><option value="6-month">6 Months</option></select>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label class="form-label">Amount Paid (₹)</label><input class="form-input" id="ext-amount" type="number" placeholder="e.g. 1000"/></div>
+      <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" type="date" id="ext-start"/></div>
+    </div>
+    <div class="modal-foot"><button class="btn-cancel" onclick="closeModal('extend-modal')">Cancel</button><button class="btn-save" onclick="extendPlan()">Extend</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FITTECH BRANDING -->
+<div id="ft-brand" style="background:#111;border-top:1px solid #1a1a1a;padding:8px 20px;text-align:right;position:relative;z-index:1;display:none">
+  <span style="font-size:10px;color:#444;font-family:'DM Sans',sans-serif">Powered by </span>
+  <a href="https://wa.me/917083328631" target="_blank" style="font-size:10px;color:#f5c800;text-decoration:none;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">FitTech Services</a>
+</div>
+
+<script>
+// ── CREDENTIALS ──
+const OWNER_USER='sdfitness', OWNER_PASS='SDfit@123';
+let currentRole='';
+const PLAN_DAYS={'1-month':30,'3-month':90,'6-month':180,'1-year':365};
+const PLAN_LABELS={'1-month':'1 Month','3-month':'3 Months','6-month':'6 Months','1-year':'1 Year'};
+let members=JSON.parse(localStorage.getItem('sd_members')||'[]');
+let payments=JSON.parse(localStorage.getItem('sd_payments')||'[]');
+let offers=JSON.parse(localStorage.getItem('sd_offers')||'[]');
+let currentFilter='all';
+
+function save(){
+  localStorage.setItem('sd_members',JSON.stringify(members));
+  localStorage.setItem('sd_payments',JSON.stringify(payments));
+  localStorage.setItem('sd_offers',JSON.stringify(offers));
+}
+
+// ── MOBILE MENU ──
+function openMobileMenu(){document.getElementById('mobile-menu').classList.add('open');document.body.style.overflow='hidden';}
+function closeMobileMenu(){document.getElementById('mobile-menu').classList.remove('open');document.body.style.overflow='';}
+
+// ── LOGIN ──
+function openLoginScreen(){document.getElementById('login-screen').classList.add('open');}
+function closeLoginScreen(){document.getElementById('login-screen').classList.remove('open');document.getElementById('login-err').textContent='';}
+
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value.trim();
+  if(u===OWNER_USER&&p===ownerPass){
+    currentRole='owner';
+  } else if(staffUsers.find(su=>su.username===u&&su.password===p)){
+    currentRole='staff';
+  } else {
+    document.getElementById('login-err').textContent='Wrong username or password';return;
+  }
+  closeLoginScreen();
+  document.getElementById('admin-app').classList.add('open');
+  document.body.style.overflow='hidden';
+  applyRoleUI();
+  renderAll();
+  // Show FitTech brand only in admin
+  document.getElementById('ft-brand').style.display='block';
+}
+
+function applyRoleUI(){
+  const isOwner=currentRole==='owner';
+  // Hide owner-only elements for staff
+  document.querySelectorAll('.owner-only').forEach(el=>el.style.display=isOwner?'':'none');
+  document.querySelectorAll('.owner-only-flex').forEach(el=>el.style.display=isOwner?'flex':'none');
+  // Staff label
+  const lbl=document.getElementById('role-label');
+  if(lbl)lbl.textContent=isOwner?'Owner':'Staff';
+  // Hide offers + staff nav for staff
+  const offNav=document.getElementById('offers-nav');
+  if(offNav)offNav.style.display=isOwner?'':'none';
+  // If staff — force to dashboard, block restricted pages
+  if(!isOwner){
+    showPage('dashboard',document.querySelector('.tab-item'));
+  }
+}
+
+// Block staff from accessing restricted pages
+function isRestrictedPage(name){
+  return['offers','staff'].includes(name)&&currentRole!=='owner';
+}
+
+function doLogout(){
+  document.getElementById('admin-app').classList.remove('open');
+  document.body.style.overflow='';
+  document.getElementById('ft-brand').style.display='none';
+  currentRole='';
+}
+function backToSite(){doLogout();}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ── PAGES ──
+function showPage(name,el){
+  ['dashboard','members','payments','expiring','offers'].forEach(p=>{
+    const pg=document.getElementById('page-'+p);
+    if(pg)pg.style.display='none';
+  });
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);if(pg)pg.style.display='block';
+  if(el)el.classList.add('active');
+  const tb=document.getElementById('tab-'+name);if(tb)tb.classList.add('active');
+  const titles={dashboard:'Dashboard',members:'Members',payments:'Payments',expiring:'Expiring Soon',offers:'Special Offers'};
+  document.getElementById('page-title').textContent=titles[name]||name;
+  if(name==='members')renderTable();
+  if(name==='payments')renderPayments();
+  if(name==='expiring')renderExpiryFull();
+  if(name==='offers')renderOffers();
+}
+
+// ── UTILS ──
+function today(){return new Date().toISOString().split('T')[0];}
+function addDays(d,n){const dt=new Date(d);dt.setDate(dt.getDate()+n);return dt.toISOString().split('T')[0];}
+function daysLeft(e){return Math.ceil((new Date(e)-new Date(today()))/(864e5));}
+function fmtDate(d){if(!d)return'—';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;}
+
+// ── MODALS ──
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+function toast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ── ADD MEMBER ──
+function openAddMember(){
+  document.getElementById('edit-id').value='';
+  document.getElementById('modal-title').textContent='Add Member';
+  ['f-name','f-phone','f-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-plan').value='1-month';
+  document.getElementById('f-cardio').value='non-cardio';
+  document.getElementById('f-gender').value='Male';
+  document.getElementById('f-amount').value='';
+  const t=today();
+  document.getElementById('f-start').value=t;
+  document.getElementById('f-end').value=addDays(t,30);
+  openModal('member-modal');
+}
+document.getElementById('f-plan').addEventListener('change',function(){
+  const s=document.getElementById('f-start').value;
+  if(s)document.getElementById('f-end').value=addDays(s,PLAN_DAYS[this.value]);
+});
+document.getElementById('f-start').addEventListener('change',function(){
+  document.getElementById('f-end').value=addDays(this.value,PLAN_DAYS[document.getElementById('f-plan').value]);
+});
+
+function saveMember(){
+  const name=document.getElementById('f-name').value.trim();
+  const phone=document.getElementById('f-phone').value.trim();
+  const plan=document.getElementById('f-plan').value;
+  const cardio=document.getElementById('f-cardio').value;
+  const start=document.getElementById('f-start').value;
+  const end=document.getElementById('f-end').value;
+  const amount=parseFloat(document.getElementById('f-amount').value)||0;
+  const gender=document.getElementById('f-gender').value;
+  const notes=document.getElementById('f-notes').value.trim();
+  if(!name||!phone||!start){toast('Fill required fields','error');return;}
+  const editId=document.getElementById('edit-id').value;
+  if(editId){
+    if(currentRole==='staff'){toast('Staff cannot edit members','error');return;}
+    const idx=members.findIndex(m=>m.id===editId);
+    if(idx>-1)members[idx]={...members[idx],name,phone,plan,cardio,start,end,gender,notes,active:true};
+    toast('Member updated');
+  } else {
+    const id='m_'+Date.now();
+    members.push({id,name,phone,plan,cardio,start,end,gender,notes,active:true,joined:today()});
+    if(amount>0)payments.push({id:'p_'+Date.now(),memberId:id,memberName:name,amount,plan,cardio,date:today()});
+    toast('Member added');
+  }
+  save();closeModal('member-modal');renderAll();
+}
+
+// ── EDIT (owner only) ──
+function editMember(id){
+  if(currentRole==='staff'){toast('Only owner can edit members','error');return;}
+  const m=members.find(x=>x.id===id);if(!m)return;
+  document.getElementById('edit-id').value=id;
+  document.getElementById('modal-title').textContent='Edit Member';
+  document.getElementById('f-name').value=m.name;
+  document.getElementById('f-phone').value=m.phone;
+  document.getElementById('f-plan').value=m.plan||'1-month';
+  document.getElementById('f-cardio').value=m.cardio||'non-cardio';
+  document.getElementById('f-start').value=m.start;
+  document.getElementById('f-end').value=m.end;
+  document.getElementById('f-gender').value=m.gender||'Male';
+  document.getElementById('f-notes').value=m.notes||'';
+  document.getElementById('f-amount').value='';
+  openModal('member-modal');
+}
+
+// ── VIEW MEMBER ──
+function viewMember(id){
+  const m=members.find(x=>x.id===id);if(!m)return;
+  document.getElementById('view-name').textContent=m.name;
+  const dl=daysLeft(m.end);
+  const status=!m.active?'Inactive':dl<0?'Expired':dl<=5?'Expiring Soon':'Active';
+  const sc=!m.active||dl<0?'var(--yellow)':dl<=5?'#e89020':'#1db954';
+  const mp=payments.filter(p=>p.memberId===id);
+  const ph=mp.length?[...mp].reverse().map(p=>`<div class="pay-item"><div><div style="font-size:13px;font-weight:600">₹${p.amount.toLocaleString('en-IN')}</div><div class="pay-date">${fmtDate(p.date)}</div></div><div style="text-align:right"><span class="pay-plan">${PLAN_LABELS[p.plan]||p.plan}</span></div></div>`).join(''):'<div style="color:var(--muted);font-size:12px;padding:8px 0">No payments yet.</div>';
+  const waMsg=`Hi ${m.name}! SD Fitness ki taraf se reminder — aapki membership ${fmtDate(m.end)} ko expire ho rahi hai. Please renew karein! Contact: 9923871089`;
+  document.getElementById('view-body').innerHTML=`
+    <div class="member-detail-grid">
+      <div><div class="detail-label">Phone</div><div class="detail-value"><a href="tel:${m.phone}" style="color:var(--yellow);text-decoration:none">${m.phone}</a></div></div>
+      <div><div class="detail-label">Status</div><div class="detail-value" style="color:${sc}">${status}</div></div>
+      <div><div class="detail-label">Plan</div><div class="detail-value">${PLAN_LABELS[m.plan]||m.plan}</div></div>
+      <div><div class="detail-label">Type</div><div class="detail-value">${m.cardio||'—'}</div></div>
+      <div><div class="detail-label">Start</div><div class="detail-value">${fmtDate(m.start)}</div></div>
+      <div><div class="detail-label">Expires</div><div class="detail-value">${fmtDate(m.end)}</div></div>
+      <div><div class="detail-label">Gender</div><div class="detail-value">${m.gender||'—'}</div></div>
+      <div><div class="detail-label">Joined</div><div class="detail-value">${fmtDate(m.joined)}</div></div>
+    </div>
+    ${m.notes?`<div style="margin-bottom:14px"><div class="detail-label">Notes</div><div class="detail-value" style="font-size:13px">${m.notes}</div></div>`:''}
+    <div style="display:flex;gap:8px;margin:14px 0;flex-wrap:wrap">
+      <a href="https://wa.me/91${m.phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="add-btn" style="text-decoration:none;font-size:11px;padding:8px 14px;width:auto">WhatsApp Reminder</a>
+      <button class="act-btn success" style="padding:8px 14px" onclick="closeModal('view-modal');openExtend('${id}')">Extend Plan</button>
+      ${currentRole==='owner'?`<button class="act-btn ${m.active?'danger':'success'}" style="padding:8px 14px" onclick="toggleActive('${id}');closeModal('view-modal')">${m.active?'Deactivate':'Activate'}</button>`:''}
+    </div>
+    <div style="margin-top:8px"><div style="font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Payment History</div>${ph}</div>`;
+  openModal('view-modal');
+}
+
+function toggleActive(id){
+  if(currentRole==='staff'){toast('Only owner can do this','error');return;}
+  const m=members.find(x=>x.id===id);if(!m)return;
+  m.active=!m.active;save();renderAll();toast(m.active?'Activated':'Deactivated');
+}
+function deleteMember(id){
+  if(currentRole==='staff'){toast('Only owner can delete','error');return;}
+  if(!confirm('Delete this member?'))return;
+  members=members.filter(m=>m.id!==id);
+  payments=payments.filter(p=>p.memberId!==id);
+  save();renderAll();toast('Deleted');
+}
+
+// ── EXTEND ──
+function openExtend(id){
+  document.getElementById('extend-id').value=id;
+  document.getElementById('ext-plan').value='1-month';
+  document.getElementById('ext-amount').value='';
+  document.getElementById('ext-start').value=today();
+  openModal('extend-modal');
+}
+function extendPlan(){
+  const id=document.getElementById('extend-id').value;
+  const plan=document.getElementById('ext-plan').value;
+  const amount=parseFloat(document.getElementById('ext-amount').value)||0;
+  const start=document.getElementById('ext-start').value;
+  const end=addDays(start,PLAN_DAYS[plan]);
+  const m=members.find(x=>x.id===id);if(!m)return;
+  m.plan=plan;m.start=start;m.end=end;m.active=true;
+  if(amount>0)payments.push({id:'p_'+Date.now(),memberId:id,memberName:m.name,amount,plan,cardio:m.cardio,date:today()});
+  save();closeModal('extend-modal');renderAll();toast('Plan extended');
+}
+
+// ── FILTERS ──
+function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTable();}
+function getFiltered(){
+  const q=(document.getElementById('search-input')?.value||'').toLowerCase();
+  return members.filter(m=>{
+    const mq=!q||m.name.toLowerCase().includes(q)||m.phone.includes(q);
+    const dl=daysLeft(m.end);const isA=m.active&&dl>=0;
+    if(currentFilter==='active')return mq&&isA;
+    if(currentFilter==='inactive')return mq&&(!m.active||dl<0);
+    if(currentFilter==='cardio')return mq&&m.cardio==='cardio';
+    if(currentFilter==='non-cardio')return mq&&m.cardio==='non-cardio';
+    return mq;
+  });
+}
+
+// ── RENDER TABLE ──
+function renderTable(){
+  const tbody=document.getElementById('members-tbody');
+  const list=getFiltered();
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state">No members found</div></td></tr>`;return;}
+  tbody.innerHTML=list.map(m=>{
+    const dl=daysLeft(m.end);const active=m.active&&dl>=0;const exp=active&&dl<=5;
+    const sb=active?(exp?`<span class="badge badge-amber"><span class="badge-dot"></span>${dl}d left</span>`:`<span class="badge badge-green"><span class="badge-dot"></span>Active</span>`):`<span class="badge badge-red"><span class="badge-dot"></span>${dl<0?'Expired':'Inactive'}</span>`;
+    const cb=m.cardio==='cardio'?`<span class="badge badge-blue">Cardio</span>`:`<span class="badge" style="background:#1a1a1a;color:var(--muted)">Non-Cardio</span>`;
+    const ownerActions=currentRole==='owner'?`<button class="act-btn" onclick="editMember('${m.id}')">Edit</button><button class="act-btn ${active?'danger':'success'}" onclick="toggleActive('${m.id}')">${active?'Deact':'Activate'}</button><button class="act-btn danger" onclick="deleteMember('${m.id}')">Del</button>`:'';
+    return`<tr><td><div style="font-weight:600">${m.name}</div><div style="font-size:10px;color:var(--muted)">${m.phone}</div></td><td>${PLAN_LABELS[m.plan]||m.plan}</td><td>${cb}</td><td style="font-size:11px;color:${dl<0?'var(--yellow)':dl<=5?'#e89020':'var(--muted)'}">${fmtDate(m.end)}</td><td>${sb}</td><td><div class="action-btns"><button class="act-btn" onclick="viewMember('${m.id}')">View</button><button class="act-btn success" onclick="openExtend('${m.id}')">Extend</button>${ownerActions}</div></td></tr>`;
+  }).join('');
+}
+
+// ── RENDER PAYMENTS ──
+function renderPayments(){
+  const tbody=document.getElementById('payments-tbody');
+  if(!payments.length){tbody.innerHTML=`<tr><td colspan="5"><div class="empty-state">No payments yet</div></td></tr>`;return;}
+  tbody.innerHTML=[...payments].reverse().map(p=>`<tr><td><div style="font-weight:600">${p.memberName}</div></td><td style="color:#1db954;font-weight:600">₹${p.amount.toLocaleString('en-IN')}</td><td><span class="badge badge-blue">${PLAN_LABELS[p.plan]||p.plan}</span></td><td style="font-size:11px;color:var(--muted)">${p.cardio||'—'}</td><td style="font-size:11px;color:var(--muted)">${fmtDate(p.date)}</td></tr>`).join('');
+}
+
+// ── EXPIRY ──
+function getExpiring(){return members.filter(m=>{const dl=daysLeft(m.end);return m.active&&dl>=0&&dl<=5;}).sort((a,b)=>daysLeft(a.end)-daysLeft(b.end));}
+function expiryCardHTML(m){
+  const dl=daysLeft(m.end);
+  const waMsg=`Hi ${m.name}! SD Fitness ki taraf se reminder — aapki membership ${dl} din mein expire ho rahi hai. Please renew karein! 💪 Contact: 9923871089`;
+  return`<div class="expiry-card ${dl<=2?'':'warn'}"><div><div class="expiry-name">${m.name}</div><div class="expiry-info">${m.phone} · ${m.cardio==='cardio'?'Cardio':'Non-Cardio'} · ${PLAN_LABELS[m.plan]||m.plan}</div><div class="expiry-info" style="margin-top:3px">Expires: ${fmtDate(m.end)}</div><div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap"><a href="https://wa.me/91${m.phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="act-btn success" style="text-decoration:none">WhatsApp</a><button class="act-btn" onclick="openExtend('${m.id}')">Extend</button></div></div><div class="expiry-days">${dl}<span>day${dl===1?'':'s'}</span></div></div>`;
+}
+function renderExpiryFull(){
+  const list=getExpiring();
+  document.getElementById('expiry-grid-full').innerHTML=list.length?list.map(expiryCardHTML).join(''):'<div style="color:var(--muted);font-size:13px">No members expiring in 5 days.</div>';
+}
+
+// ── OFFERS (owner only) ──
+function renderOffers(){
+  const el=document.getElementById('offers-list');
+  if(!offers.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">No offers added yet.</div>';return;}
+  el.innerHTML=offers.map((o,i)=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;border-left:3px solid var(--yellow)">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:10px">
+        <div>
+          <div style="font-family:var(--font-d);font-size:20px;color:var(--yellow)">${o.title}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px">${o.desc}</div>
+          ${o.expiry?`<div style="font-size:11px;color:#e89020;margin-top:6px">Valid till: ${fmtDate(o.expiry)}</div>`:''}
+        </div>
+        <button class="act-btn danger" onclick="deleteOffer(${i})" style="flex-shrink:0">Remove</button>
+      </div>
+    </div>`).join('');
+}
+function saveOffer(){
+  const title=document.getElementById('o-title').value.trim();
+  const desc=document.getElementById('o-desc').value.trim();
+  const expiry=document.getElementById('o-expiry').value;
+  if(!title){toast('Add offer title','error');return;}
+  offers.push({title,desc,expiry,added:today()});
+  save();closeModal('offer-modal');renderOffers();toast('Offer added ✓');
+  document.getElementById('o-title').value='';
+  document.getElementById('o-desc').value='';
+  document.getElementById('o-expiry').value='';
+}
+function deleteOffer(i){offers.splice(i,1);save();renderOffers();toast('Offer removed');}
+
+// ── DASHBOARD ──
+function renderDashboard(){
+  const active=members.filter(m=>m.active&&daysLeft(m.end)>=0);
+  const inactive=members.filter(m=>!m.active||daysLeft(m.end)<0);
+  const expiring=getExpiring();
+  document.getElementById('stat-total').textContent=members.length;
+  document.getElementById('stat-active').textContent=active.length;
+  document.getElementById('stat-inactive').textContent=inactive.length;
+  document.getElementById('stat-expiring').textContent=expiring.length;
+  document.getElementById('stat-cardio').textContent=active.filter(m=>m.cardio==='cardio').length;
+  document.getElementById('stat-noncardio').textContent=active.filter(m=>m.cardio==='non-cardio').length;
+  const badge=document.getElementById('expiry-nav-badge');
+  const tbadge=document.getElementById('expiry-tab-badge');
+  if(expiring.length>0){
+    badge.textContent=expiring.length;badge.style.display='inline-block';
+    tbadge.textContent=expiring.length;tbadge.style.display='inline-block';
+    document.getElementById('topbar-expiry').textContent=`${expiring.length} expiring soon`;
+    document.getElementById('topbar-expiry').style.display='block';
+  } else {
+    badge.style.display='none';tbadge.style.display='none';
+    document.getElementById('topbar-expiry').style.display='none';
+  }
+  document.getElementById('expiry-cards').innerHTML=expiring.length?expiring.map(expiryCardHTML).join(''):'<div style="color:var(--muted);font-size:12px">No members expiring soon.</div>';
+}
+
+// ── MONTHLY CSV BACKUP ──
+function downloadCSV(){
+  const rows=[['Name','Phone','Plan','Type','Gender','Start','Expires','Status','Joined','Notes']];
+  members.forEach(m=>{
+    const dl=daysLeft(m.end);
+    const status=!m.active?'Inactive':dl<0?'Expired':dl<=5?'Expiring Soon':'Active';
+    rows.push([m.name,m.phone,PLAN_LABELS[m.plan]||m.plan,m.cardio||'',m.gender||'',fmtDate(m.start),fmtDate(m.end),status,fmtDate(m.joined),m.notes||'']);
+  });
+  // Payment history rows
+  rows.push([]);
+  rows.push(['--- PAYMENT HISTORY ---']);
+  rows.push(['Member','Amount','Plan','Type','Date']);
+  payments.forEach(p=>rows.push([p.memberName,'₹'+p.amount,PLAN_LABELS[p.plan]||p.plan,p.cardio||'',fmtDate(p.date)]));
+
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`SD_Fitness_Backup_${today()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup downloaded ✓');
+}
+
+// Auto monthly backup check
+function checkAutoBackup(){
+  const lastBackup=localStorage.getItem('sd_last_backup')||'';
+  const thisMonth=today().slice(0,7);
+  if(lastBackup!==thisMonth&&members.length>0){
+    setTimeout(()=>{
+      if(confirm('Monthly backup due! Download your member data CSV now?')){
+        downloadCSV();
+        localStorage.setItem('sd_last_backup',thisMonth);
+      }
+    },2000);
+  }
+}
+
+// ── USER MANAGEMENT ──
+let staffUsers=JSON.parse(localStorage.getItem('sd_staff_users')||'[]');
+let ownerPass=localStorage.getItem('sd_owner_pass')||OWNER_PASS;
+
+function renderStaffStatus(){renderStaffUsers();}
+
+function renderStaffUsers(){
+  const el=document.getElementById('staff-users-list');
+  if(!el)return;
+  if(!staffUsers.length){
+    el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:20px 0">No staff users yet. Click "+ Create User" to add one.</div>';
+    return;
+  }
+  el.innerHTML=staffUsers.map((u,i)=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+      <div>
+        <div style="font-family:var(--font-d);font-size:18px;color:var(--yellow);letter-spacing:1px">${u.username}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">Password: <span style="color:var(--white)" id="pw-${i}">••••••••</span>
+          <button class="act-btn" style="padding:3px 8px;margin-left:6px;font-size:10px" onclick="togglePw(${i},'${u.password}')">Show</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Created: ${fmtDate(u.created)} · Role: Staff</div>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="act-btn" onclick="openModal('edit-user-modal');setupEditUser(${i})">Change Password</button>
+        <button class="act-btn danger" onclick="deleteStaffUser(${i})">Delete User</button>
+      </div>
+    </div>`).join('');
+}
+
+function togglePw(i,pass){
+  const el=document.getElementById('pw-'+i);
+  if(!el)return;
+  el.textContent=el.textContent==='••••••••'?pass:'••••••••';
+}
+
+function createStaffUser(){
+  const uname=document.getElementById('new-u-name').value.trim().toLowerCase().replace(/\s+/g,'');
+  const upass=document.getElementById('new-u-pass').value.trim();
+  if(!uname||!upass){toast('Fill both fields','error');return;}
+  if(upass.length<4){toast('Password min 4 characters','error');return;}
+  if(staffUsers.find(u=>u.username===uname)){toast('Username already exists','error');return;}
+  staffUsers.push({username:uname,password:upass,created:today(),role:'staff'});
+  localStorage.setItem('sd_staff_users',JSON.stringify(staffUsers));
+  document.getElementById('new-u-name').value='';
+  document.getElementById('new-u-pass').value='';
+  closeModal('add-user-modal');
+  renderStaffUsers();
+  toast('User '+uname+' created ✓');
+}
+
+function setupEditUser(i){
+  document.getElementById('edit-u-index').value=i;
+  document.getElementById('edit-u-label').textContent='Change password for: '+staffUsers[i].username;
+  document.getElementById('edit-u-pass').value='';
+}
+
+function updateStaffPass(){
+  const i=parseInt(document.getElementById('edit-u-index').value);
+  const np=document.getElementById('edit-u-pass').value.trim();
+  if(!np||np.length<4){toast('Password min 4 characters','error');return;}
+  staffUsers[i].password=np;
+  localStorage.setItem('sd_staff_users',JSON.stringify(staffUsers));
+  closeModal('edit-user-modal');
+  renderStaffUsers();
+  toast('Password updated ✓');
+}
+
+function deleteStaffUser(i){
+  if(!confirm('Delete user "'+staffUsers[i].username+'"?'))return;
+  staffUsers.splice(i,1);
+  localStorage.setItem('sd_staff_users',JSON.stringify(staffUsers));
+  renderStaffUsers();
+  toast('User deleted');
+}
+
+// ── OWNER PASSWORD CHANGE ──
+function changeOwnerPass(){
+  const cur=document.getElementById('owner-cur-pass').value.trim();
+  const np=document.getElementById('owner-new-pass').value.trim();
+  const cp=document.getElementById('owner-confirm-pass').value.trim();
+  if(cur!==ownerPass){toast('Current password is wrong','error');return;}
+  if(np.length<6){toast('New password min 6 characters','error');return;}
+  if(np!==cp){toast('Passwords do not match','error');return;}
+  ownerPass=np;
+  localStorage.setItem('sd_owner_pass',ownerPass);
+  document.getElementById('owner-cur-pass').value='';
+  document.getElementById('owner-new-pass').value='';
+  document.getElementById('owner-confirm-pass').value='';
+  toast('Owner password updated ✓');
+}
+
+// ── PUBLIC OFFERS ON WEBSITE ──
+function renderPublicOffers(){
+  const section=document.getElementById('offers-public');
+  const grid=document.getElementById('public-offers-grid');
+  if(!section||!grid)return;
+  const active=offers.filter(o=>{
+    if(!o.expiry)return true;
+    return new Date(o.expiry)>=new Date();
+  });
+  if(active.length===0){section.style.display='none';return;}
+  section.style.display='block';
+  grid.innerHTML=active.map(o=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;border-left:3px solid var(--yellow)">
+      <div style="font-family:var(--font-d);font-size:22px;color:var(--yellow);margin-bottom:6px">${o.title}</div>
+      ${o.desc?`<div style="font-size:13px;color:var(--muted);margin-bottom:6px">${o.desc}</div>`:''}
+      ${o.expiry?`<div style="font-size:11px;color:#e89020">Valid till: ${fmtDate(o.expiry)}</div>`:''}
+      <a href="https://wa.me/919923871089" target="_blank" style="display:inline-block;margin-top:12px;background:var(--yellow);color:#111;padding:8px 18px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none">Claim Offer</a>
+    </div>`).join('');
+}
+
+// Update showPage to handle staff page
+const _origShowPage=showPage;
+function showPage(name,el){
+  if(isRestrictedPage(name)){toast('Access denied','error');return;}
+  ['dashboard','members','payments','expiring','offers','staff'].forEach(p=>{
+    const pg=document.getElementById('page-'+p);if(pg)pg.style.display='none';
+  });
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);if(pg)pg.style.display='block';
+  if(el)el.classList.add('active');
+  const tb=document.getElementById('tab-'+name);if(tb)tb.classList.add('active');
+  const titles={dashboard:'Dashboard',members:'Members',payments:'Payments',expiring:'Expiring Soon',offers:'Special Offers',staff:'Staff Access'};
+  document.getElementById('page-title').textContent=titles[name]||name;
+  if(name==='members')renderTable();
+  if(name==='payments')renderPayments();
+  if(name==='expiring')renderExpiryFull();
+  if(name==='offers')renderOffers();
+  if(name==='staff')renderStaffStatus();
+}
+
+function renderAll(){
+  renderDashboard();
+  renderPublicOffers();
+  checkAutoBackup();
+  const cur=document.querySelector('#admin-app [id^="page-"]:not([style*="none"])');
+  if(cur){const n=cur.id.replace('page-','');if(n==='members')renderTable();if(n==='payments')renderPayments();if(n==='expiring')renderExpiryFull();if(n==='offers')renderOffers();if(n==='staff')renderStaffStatus();}
+}
+
+// Also render public offers on page load
+renderPublicOffers();
+</script>
+
+<!-- ADD USER MODAL -->
+<div class="overlay" id="add-user-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head"><div class="modal-title">Create Staff User</div><button class="close-btn" onclick="closeModal('add-user-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row full"><div class="form-group"><label class="form-label">Username *</label><input class="form-input" id="new-u-name" placeholder="e.g. sandesh" autocomplete="off"/></div></div>
+      <div class="form-row full"><div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="new-u-pass" type="text" placeholder="min 4 characters" autocomplete="off"/></div></div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">This user will be able to add members, view members and send WhatsApp reminders only. Share the username and password with your staff directly.</p>
+    </div>
+    <div class="modal-foot"><button class="btn-cancel" onclick="closeModal('add-user-modal')">Cancel</button><button class="btn-save" onclick="createStaffUser()">Create User</button></div>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="overlay" id="edit-user-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head"><div class="modal-title">Change Password</div><button class="close-btn" onclick="closeModal('edit-user-modal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-u-index"/>
+      <p style="font-size:13px;color:var(--yellow);margin-bottom:14px" id="edit-u-label"></p>
+      <div class="form-row full"><div class="form-group"><label class="form-label">New Password *</label><input class="form-input" id="edit-u-pass" type="text" placeholder="min 4 characters"/></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn-cancel" onclick="closeModal('edit-user-modal')">Cancel</button><button class="btn-save" onclick="updateStaffPass()">Update Password</button></div>
+  </div>
+</div>
+
+<!-- OFFER MODAL -->
+<div class="overlay owner-only" id="offer-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head"><div class="modal-title">Add Special Offer</div><button class="close-btn" onclick="closeModal('offer-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row full"><div class="form-group"><label class="form-label">Offer Title *</label><input class="form-input" id="o-title" placeholder="e.g. Summer Special — 3 months at ₹1,999"/></div></div>
+      <div class="form-row full"><div class="form-group"><label class="form-label">Description</label><input class="form-input" id="o-desc" placeholder="e.g. Free diet plan included"/></div></div>
+      <div class="form-row full"><div class="form-group"><label class="form-label">Valid Till</label><input class="form-input" type="date" id="o-expiry"/></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn-cancel" onclick="closeModal('offer-modal')">Cancel</button><button class="btn-save" onclick="saveOffer()">Add Offer</button></div>
+  </div>
+</div>
+</body>
+</html>
