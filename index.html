@@ -921,6 +921,11 @@ let staffUsers=[];
 let ownerPass=''; // loaded from DB only — never hardcoded
 let currentFilter='all';
 
+// ── SESSION PERSISTENCE (survive page refresh) ──
+function saveSession(){try{sessionStorage.setItem('sd_role',currentRole);}catch(e){}}
+function loadSession(){try{return sessionStorage.getItem('sd_role')||'';}catch(e){return '';}}
+function clearSession(){try{sessionStorage.removeItem('sd_role');}catch(e){}}
+
 // ── SHA-256 HASHING ──
 async function hashPassword(plain){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(plain));
@@ -1024,9 +1029,9 @@ async function doLogin(){
   hideLoader();
   const hashed=await hashPassword(p);
   if(u===OWNER_USER&&hashed===ownerPass){
-    currentRole='owner';resetRateLimit();
+    currentRole='owner';resetRateLimit();saveSession();
   } else if(staffUsers.find(su=>su.username===u&&su.password===hashed&&su.active!==false)){
-    currentRole='staff';resetRateLimit();
+    currentRole='staff';resetRateLimit();saveSession();
   } else {
     recordFailedAttempt();return;
   }
@@ -1076,7 +1081,7 @@ function doLogout(){
   document.body.style.overflow='';
   window.scrollTo(0,parseInt(scrollY||'0')*-1);
   document.getElementById('ft-brand').style.display='none';
-  currentRole='';
+  currentRole='';clearSession();
 }
 function backToSite(){doLogout();}
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -1224,8 +1229,9 @@ async function deleteMember(id){
   if(currentRole==='staff'){toast('Only owner can delete','error');return;}
   if(!confirm('Delete this member? They will be hidden but data stays safe in database.'))return;
   const m=members.find(x=>x.id===id);if(!m)return;
-  m.active=false;
+  m.active=false;m._deleted=true;
   await saveMemberToDB(m,false);
+  members=members.filter(x=>x.id!==id);
   renderAll();toast('Member removed ✓');
 }
 
@@ -1543,8 +1549,32 @@ function renderAll(){
   if(cur){const n=cur.id.replace('page-','');if(n==='members')renderTable();if(n==='payments')renderPayments();if(n==='expiring')renderExpiryFull();if(n==='offers')renderOffers();if(n==='staff')renderStaffStatus();}
 }
 
-// Also render public offers on page load
-renderPublicOffers();
+// Load offers from Supabase on page load for public website section
+(async()=>{
+  try{
+    const o=await sb.from('offers').select('*');
+    offers=(o.data||[]).filter(r=>r.title!=='__deleted__').map(r=>({id:r.id,title:r.title,desc:r.description,expiry:r.expiry,added:r.added}));
+  }catch(e){console.log('Offers load error',e);}
+  renderPublicOffers();
+})();
+
+// Restore session on page refresh
+(async()=>{
+  const role=loadSession();
+  if(!role)return;
+  currentRole=role;
+  const adminApp=document.getElementById('admin-app');
+  if(adminApp){
+    adminApp.classList.add('open');
+    document.body.style.overflow='hidden';
+    showLoader('Restoring session...');
+    await Promise.all([loadFromSupabase(),loadStaffAndSettings()]);
+    hideLoader();
+    applyRoleUI();
+    renderAll();
+    document.getElementById('ft-brand').style.display='block';
+  }
+})();
 </script>
 
 <!-- ADD USER MODAL -->
