@@ -904,7 +904,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 <script>
 // ── CREDENTIALS ──
 const OWNER_USER='sdfitness';
-// Owner password 
+// Owner password is never stored in source code — always loaded from Supabase DB
 let currentRole='';
 const PLAN_DAYS={'1-month':30,'3-month':90,'6-month':180,'1-year':365};
 const PLAN_LABELS={'1-month':'1 Month','3-month':'3 Months','6-month':'6 Months','1-year':'1 Year'};
@@ -918,7 +918,7 @@ let members=[];
 let payments=[];
 let offers=[];
 let staffUsers=[];
-let ownerPass=''; // loaded from DB only — never hardcoded
+let ownerPass=''; // never hardcoded
 let currentFilter='all';
 
 // ── SESSION PERSISTENCE (survive page refresh) ──
@@ -954,7 +954,7 @@ async function loadFromSupabase(){
       sb.from('payments').select('*'),
       sb.from('offers').select('*')
     ]);
-    members=(m.data||[]).map(r=>({id:r.id,name:r.name,phone:r.phone,plan:r.plan,cardio:r.cardio,start:r.start_date,end:r.end_date,gender:r.gender,notes:r.notes,active:r.active,joined:r.joined}));
+    members=(m.data||[]).filter(r=>!r.deleted).map(r=>({id:r.id,name:r.name,phone:r.phone,plan:r.plan,cardio:r.cardio,start:r.start_date,end:r.end_date,gender:r.gender,notes:r.notes,active:r.active,joined:r.joined}));
     payments=(p.data||[]).map(r=>({id:r.id,memberId:r.member_id,memberName:r.member_name,amount:r.amount,plan:r.plan,cardio:r.cardio,date:r.date}));
     offers=(o.data||[]).filter(r=>r.title!=='__deleted__').map(r=>({id:r.id,title:r.title,desc:r.description,expiry:r.expiry,added:r.added}));
   }catch(e){console.error('Load error',e);toast('Connection error — check internet','error');}
@@ -972,7 +972,7 @@ async function loadStaffAndSettings(){
 
 // ── SUPABASE SAVE FUNCTIONS ──
 async function saveMemberToDB(m,isNew){
-  const row={id:m.id,name:m.name,phone:m.phone,plan:m.plan,cardio:m.cardio,start_date:m.start,end_date:m.end,gender:m.gender,notes:m.notes,active:m.active,joined:m.joined};
+  const row={id:m.id,name:m.name,phone:m.phone,plan:m.plan,cardio:m.cardio,start_date:m.start,end_date:m.end,gender:m.gender,notes:m.notes,active:m.active,joined:m.joined,deleted:m.deleted||false};
   if(isNew)await sb.from('members').insert(row);
   else await sb.from('members').update(row).eq('id',m.id);
 }
@@ -1229,7 +1229,7 @@ async function deleteMember(id){
   if(currentRole==='staff'){toast('Only owner can delete','error');return;}
   if(!confirm('Delete this member? They will be hidden but data stays safe in database.'))return;
   const m=members.find(x=>x.id===id);if(!m)return;
-  m.active=false;m._deleted=true;
+  m.deleted=true;
   await saveMemberToDB(m,false);
   members=members.filter(x=>x.id!==id);
   renderAll();toast('Member removed ✓');
