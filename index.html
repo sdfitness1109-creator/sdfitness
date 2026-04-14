@@ -755,8 +755,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
             <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;max-width:420px">
               <div style="display:flex;flex-direction:column;gap:10px">
                 <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" id="owner-cur-pass" type="password" placeholder="Enter current password"/></div>
-                <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="owner-new-pass" type="text" placeholder="Min 6 characters"/></div>
-                <div class="form-group"><label class="form-label">Confirm New Password</label><input class="form-input" id="owner-confirm-pass" type="text" placeholder="Repeat new password"/></div>
+                <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="owner-new-pass" type="password" placeholder="Min 6 characters"/></div>
+                <div class="form-group"><label class="form-label">Confirm New Password</label><input class="form-input" id="owner-confirm-pass" type="password" placeholder="Repeat new password"/></div>
                 <button class="btn-save" style="width:100%;margin-top:4px" onclick="changeOwnerPass()">Update My Password</button>
               </div>
             </div>
@@ -903,7 +903,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <script>
 // ── CREDENTIALS ──
-const OWNER_USER='sdfitness';
+let OWNER_USER=''; // loaded from DB — never hardcoded
 // Owner password is never stored in source code — always loaded from Supabase DB
 let currentRole='';
 const PLAN_DAYS={'1-month':30,'3-month':90,'6-month':180,'1-year':365};
@@ -918,7 +918,7 @@ let members=[];
 let payments=[];
 let offers=[];
 let staffUsers=[];
-let ownerPass=''; // never hardcoded
+let ownerPass=''; // loaded from DB only — never hardcoded
 let currentFilter='all';
 
 // ── SESSION PERSISTENCE (survive page refresh) ──
@@ -930,6 +930,16 @@ function clearSession(){try{sessionStorage.removeItem('sd_role');}catch(e){}}
 async function hashPassword(plain){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(plain));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── XSS SANITIZATION ──
+function s(str){
+  return String(str||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#x27;');
 }
 
 // ── LOADER ──
@@ -967,6 +977,8 @@ async function loadStaffAndSettings(){
     staffUsers=(su.data||[]).filter(r=>r.active!==false).map(r=>({id:r.id,username:r.username,password:r.password,created:r.created,role:r.role,active:r.active}));
     const op=(st.data||[]).find(s=>s.key==='owner_pass');
     if(op)ownerPass=op.value;
+    const ou=(st.data||[]).find(s=>s.key==='owner_user');
+    if(ou)OWNER_USER=ou.value; else OWNER_USER='sdfitness';
   }catch(e){console.error('Staff load error',e);}
 }
 
@@ -1029,9 +1041,9 @@ async function doLogin(){
   hideLoader();
   const hashed=await hashPassword(p);
   if(u===OWNER_USER&&hashed===ownerPass){
-    currentRole='owner';resetRateLimit();saveSession();
+    currentRole='owner';resetRateLimit();saveSession();sessionStorage.setItem('sd_user',u);
   } else if(staffUsers.find(su=>su.username===u&&su.password===hashed&&su.active!==false)){
-    currentRole='staff';resetRateLimit();saveSession();
+    currentRole='staff';resetRateLimit();saveSession();sessionStorage.setItem('sd_user',u);
   } else {
     recordFailedAttempt();return;
   }
@@ -1081,7 +1093,7 @@ function doLogout(){
   document.body.style.overflow='';
   window.scrollTo(0,parseInt(scrollY||'0')*-1);
   document.getElementById('ft-brand').style.display='none';
-  currentRole='';clearSession();
+  currentRole='';clearSession();sessionStorage.removeItem('sd_user');
 }
 function backToSite(){doLogout();}
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -1190,7 +1202,7 @@ function editMember(id){
 // ── VIEW MEMBER ──
 function viewMember(id){
   const m=members.find(x=>x.id===id);if(!m)return;
-  document.getElementById('view-name').textContent=m.name;
+  document.getElementById('view-name').textContent=s(m.name);
   const dl=daysLeft(m.end);
   const status=!m.active?'Inactive':dl<0?'Expired':dl<=5?'Expiring Soon':'Active';
   const sc=!m.active||dl<0?'var(--yellow)':dl<=5?'#e89020':'#1db954';
@@ -1199,7 +1211,7 @@ function viewMember(id){
   const waMsg=`Hi ${m.name}! SD Fitness ki taraf se reminder — aapki membership ${fmtDate(m.end)} ko expire ho rahi hai. Please renew karein! Contact: 9923871089`;
   document.getElementById('view-body').innerHTML=`
     <div class="member-detail-grid">
-      <div><div class="detail-label">Phone</div><div class="detail-value"><a href="tel:${m.phone}" style="color:var(--yellow);text-decoration:none">${m.phone}</a></div></div>
+      <div><div class="detail-label">Phone</div><div class="detail-value"><a href="tel:${s(m.phone)}" style="color:var(--yellow);text-decoration:none">${s(m.phone)}</a></div></div>
       <div><div class="detail-label">Status</div><div class="detail-value" style="color:${sc}">${status}</div></div>
       <div><div class="detail-label">Plan</div><div class="detail-value">${PLAN_LABELS[m.plan]||m.plan}</div></div>
       <div><div class="detail-label">Type</div><div class="detail-value">${m.cardio||'—'}</div></div>
@@ -1208,7 +1220,7 @@ function viewMember(id){
       <div><div class="detail-label">Gender</div><div class="detail-value">${m.gender||'—'}</div></div>
       <div><div class="detail-label">Joined</div><div class="detail-value">${fmtDate(m.joined)}</div></div>
     </div>
-    ${m.notes?`<div style="margin-bottom:14px"><div class="detail-label">Notes</div><div class="detail-value" style="font-size:13px">${m.notes}</div></div>`:''}
+    ${m.notes?`<div style="margin-bottom:14px"><div class="detail-label">Notes</div><div class="detail-value" style="font-size:13px">${s(m.notes)}</div></div>`:''}
     <div style="display:flex;gap:8px;margin:14px 0;flex-wrap:wrap">
       <a href="https://wa.me/91${m.phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="add-btn" style="text-decoration:none;font-size:11px;padding:8px 14px;width:auto">WhatsApp Reminder</a>
       <button class="act-btn success" style="padding:8px 14px" onclick="closeModal('view-modal');openExtend('${id}')">Extend Plan</button>
@@ -1281,7 +1293,7 @@ function renderTable(){
     const sb=active?(exp?`<span class="badge badge-amber"><span class="badge-dot"></span>${dl}d left</span>`:`<span class="badge badge-green"><span class="badge-dot"></span>Active</span>`):`<span class="badge badge-red"><span class="badge-dot"></span>${dl<0?'Expired':'Inactive'}</span>`;
     const cb=m.cardio==='cardio'?`<span class="badge badge-blue">Cardio</span>`:`<span class="badge" style="background:#1a1a1a;color:var(--muted)">Non-Cardio</span>`;
     const ownerActions=currentRole==='owner'?`<button class="act-btn" onclick="editMember('${m.id}')">Edit</button><button class="act-btn ${active?'danger':'success'}" onclick="toggleActive('${m.id}')">${active?'Deact':'Activate'}</button><button class="act-btn danger" onclick="deleteMember('${m.id}')">Del</button>`:'';
-    return`<tr><td><div style="font-weight:600">${m.name}</div><div style="font-size:10px;color:var(--muted)">${m.phone}</div></td><td>${PLAN_LABELS[m.plan]||m.plan}</td><td>${cb}</td><td style="font-size:11px;color:${dl<0?'var(--yellow)':dl<=5?'#e89020':'var(--muted)'}">${fmtDate(m.end)}</td><td>${sb}</td><td><div class="action-btns"><button class="act-btn" onclick="viewMember('${m.id}')">View</button><button class="act-btn success" onclick="openExtend('${m.id}')">Extend</button>${ownerActions}</div></td></tr>`;
+    return`<tr><td><div style="font-weight:600">${s(m.name)}</div><div style="font-size:10px;color:var(--muted)">${s(m.phone)}</div></td><td>${PLAN_LABELS[m.plan]||m.plan}</td><td>${cb}</td><td style="font-size:11px;color:${dl<0?'var(--yellow)':dl<=5?'#e89020':'var(--muted)'}">${fmtDate(m.end)}</td><td>${sb}</td><td><div class="action-btns"><button class="act-btn" onclick="viewMember('${m.id}')">View</button><button class="act-btn success" onclick="openExtend('${m.id}')">Extend</button>${ownerActions}</div></td></tr>`;
   }).join('');
 }
 
@@ -1289,7 +1301,7 @@ function renderTable(){
 function renderPayments(){
   const tbody=document.getElementById('payments-tbody');
   if(!payments.length){tbody.innerHTML=`<tr><td colspan="5"><div class="empty-state">No payments yet</div></td></tr>`;return;}
-  tbody.innerHTML=[...payments].reverse().map(p=>`<tr><td><div style="font-weight:600">${p.memberName}</div></td><td style="color:#1db954;font-weight:600">₹${p.amount.toLocaleString('en-IN')}</td><td><span class="badge badge-blue">${PLAN_LABELS[p.plan]||p.plan}</span></td><td style="font-size:11px;color:var(--muted)">${p.cardio||'—'}</td><td style="font-size:11px;color:var(--muted)">${fmtDate(p.date)}</td></tr>`).join('');
+  tbody.innerHTML=[...payments].reverse().map(p=>`<tr><td><div style="font-weight:600">${s(p.memberName)}</div></td><td style="color:#1db954;font-weight:600">₹${p.amount.toLocaleString('en-IN')}</td><td><span class="badge badge-blue">${PLAN_LABELS[p.plan]||p.plan}</span></td><td style="font-size:11px;color:var(--muted)">${p.cardio||'—'}</td><td style="font-size:11px;color:var(--muted)">${fmtDate(p.date)}</td></tr>`).join('');
 }
 
 // ── EXPIRY ──
@@ -1297,7 +1309,7 @@ function getExpiring(){return members.filter(m=>{const dl=daysLeft(m.end);return
 function expiryCardHTML(m){
   const dl=daysLeft(m.end);
   const waMsg=`Hi ${m.name}! SD Fitness ki taraf se reminder — aapki membership ${dl} din mein expire ho rahi hai. Please renew karein! 💪 Contact: 9923871089`;
-  return`<div class="expiry-card ${dl<=2?'':'warn'}"><div><div class="expiry-name">${m.name}</div><div class="expiry-info">${m.phone} · ${m.cardio==='cardio'?'Cardio':'Non-Cardio'} · ${PLAN_LABELS[m.plan]||m.plan}</div><div class="expiry-info" style="margin-top:3px">Expires: ${fmtDate(m.end)}</div><div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap"><a href="https://wa.me/91${m.phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="act-btn success" style="text-decoration:none">WhatsApp</a><button class="act-btn" onclick="openExtend('${m.id}')">Extend</button></div></div><div class="expiry-days">${dl}<span>day${dl===1?'':'s'}</span></div></div>`;
+  return`<div class="expiry-card ${dl<=2?'':'warn'}"><div><div class="expiry-name">${s(m.name)}</div><div class="expiry-info">${s(m.phone)} · ${m.cardio==='cardio'?'Cardio':'Non-Cardio'} · ${PLAN_LABELS[m.plan]||m.plan}</div><div class="expiry-info" style="margin-top:3px">Expires: ${fmtDate(m.end)}</div><div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap"><a href="https://wa.me/91${m.phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="act-btn success" style="text-decoration:none">WhatsApp</a><button class="act-btn" onclick="openExtend('${m.id}')">Extend</button></div></div><div class="expiry-days">${dl}<span>day${dl===1?'':'s'}</span></div></div>`;
 }
 function renderExpiryFull(){
   const list=getExpiring();
@@ -1312,8 +1324,8 @@ function renderOffers(){
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;border-left:3px solid var(--yellow)">
       <div style="display:flex;justify-content:space-between;align-items:start;gap:10px">
         <div>
-          <div style="font-family:var(--font-d);font-size:20px;color:var(--yellow)">${o.title}</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:4px">${o.desc}</div>
+          <div style="font-family:var(--font-d);font-size:20px;color:var(--yellow)">${s(o.title)}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px">${s(o.desc)}</div>
           ${o.expiry?`<div style="font-size:11px;color:#e89020;margin-top:6px">Valid till: ${fmtDate(o.expiry)}</div>`:''}
         </div>
         <button class="act-btn danger" onclick="deleteOffer(${i})" style="flex-shrink:0">Remove</button>
@@ -1423,7 +1435,7 @@ function renderStaffUsers(){
   el.innerHTML=staffUsers.map((u,i)=>`
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
       <div>
-        <div style="font-family:var(--font-d);font-size:18px;color:var(--yellow);letter-spacing:1px">${u.username}</div>
+        <div style="font-family:var(--font-d);font-size:18px;color:var(--yellow);letter-spacing:1px">${s(u.username)}</div>
         <div style="font-size:12px;color:var(--muted);margin-top:3px">Password: <span style="color:var(--white)">••••••••</span> <span style="font-size:10px;color:#555">(secured)</span></div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Created: ${fmtDate(u.created)} · Role: Staff</div>
       </div>
@@ -1513,8 +1525,8 @@ function renderPublicOffers(){
   section.style.display='block';
   grid.innerHTML=active.map(o=>`
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;border-left:3px solid var(--yellow)">
-      <div style="font-family:var(--font-d);font-size:22px;color:var(--yellow);margin-bottom:6px">${o.title}</div>
-      ${o.desc?`<div style="font-size:13px;color:var(--muted);margin-bottom:6px">${o.desc}</div>`:''}
+      <div style="font-family:var(--font-d);font-size:22px;color:var(--yellow);margin-bottom:6px">${s(o.title)}</div>
+      ${o.desc?`<div style="font-size:13px;color:var(--muted);margin-bottom:6px">${s(o.desc)}</div>`:''}
       ${o.expiry?`<div style="font-size:11px;color:#e89020">Valid till: ${fmtDate(o.expiry)}</div>`:''}
       <a href="https://wa.me/919923871089" target="_blank" style="display:inline-block;margin-top:12px;background:var(--yellow);color:#111;padding:8px 18px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none">Claim Offer</a>
     </div>`).join('');
@@ -1558,17 +1570,24 @@ function renderAll(){
   renderPublicOffers();
 })();
 
-// Restore session on page refresh
+// Restore session on page refresh — verify against DB first
 (async()=>{
   const role=loadSession();
-  if(!role)return;
+  const savedUser=sessionStorage.getItem('sd_user')||'';
+  if(!role||!savedUser)return;
+  // Verify session is still valid by checking DB
+  showLoader('Restoring session...');
+  await loadStaffAndSettings();
+  let valid=false;
+  if(role==='owner'&&savedUser===OWNER_USER){valid=true;}
+  else if(role==='staff'&&staffUsers.find(u=>u.username===savedUser)){valid=true;}
+  if(!valid){clearSession();sessionStorage.removeItem('sd_user');hideLoader();return;}
   currentRole=role;
   const adminApp=document.getElementById('admin-app');
   if(adminApp){
     adminApp.classList.add('open');
     document.body.style.overflow='hidden';
-    showLoader('Restoring session...');
-    await Promise.all([loadFromSupabase(),loadStaffAndSettings()]);
+    await loadFromSupabase();
     hideLoader();
     applyRoleUI();
     renderAll();
@@ -1583,7 +1602,7 @@ function renderAll(){
     <div class="modal-head"><div class="modal-title">Create Staff User</div><button class="close-btn" onclick="closeModal('add-user-modal')">✕</button></div>
     <div class="modal-body">
       <div class="form-row full"><div class="form-group"><label class="form-label">Username *</label><input class="form-input" id="new-u-name" placeholder="e.g. sandesh" autocomplete="off"/></div></div>
-      <div class="form-row full"><div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="new-u-pass" type="text" placeholder="min 4 characters" autocomplete="off"/></div></div>
+      <div class="form-row full"><div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="new-u-pass" type="password" placeholder="min 4 characters" autocomplete="off"/></div></div>
       <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">This user will be able to add members, view members and send WhatsApp reminders only. Share the username and password with your staff directly.</p>
     </div>
     <div class="modal-foot"><button class="btn-cancel" onclick="closeModal('add-user-modal')">Cancel</button><button class="btn-save" onclick="createStaffUser()">Create User</button></div>
@@ -1597,7 +1616,7 @@ function renderAll(){
     <div class="modal-body">
       <input type="hidden" id="edit-u-index"/>
       <p style="font-size:13px;color:var(--yellow);margin-bottom:14px" id="edit-u-label"></p>
-      <div class="form-row full"><div class="form-group"><label class="form-label">New Password *</label><input class="form-input" id="edit-u-pass" type="text" placeholder="min 4 characters"/></div></div>
+      <div class="form-row full"><div class="form-group"><label class="form-label">New Password *</label><input class="form-input" id="edit-u-pass" type="password" placeholder="min 4 characters"/></div></div>
     </div>
     <div class="modal-foot"><button class="btn-cancel" onclick="closeModal('edit-user-modal')">Cancel</button><button class="btn-save" onclick="updateStaffPass()">Update Password</button></div>
   </div>
