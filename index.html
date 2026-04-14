@@ -903,7 +903,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <script>
 // ── CREDENTIALS ──
-const OWNER_USER='sdfitness', OWNER_PASS='SDfit@123';
+const OWNER_USER='sdfitness';
+// Owner password is never stored in source code — always loaded from Supabase DB
 let currentRole='';
 const PLAN_DAYS={'1-month':30,'3-month':90,'6-month':180,'1-year':365};
 const PLAN_LABELS={'1-month':'1 Month','3-month':'3 Months','6-month':'6 Months','1-year':'1 Year'};
@@ -917,8 +918,14 @@ let members=[];
 let payments=[];
 let offers=[];
 let staffUsers=[];
-let ownerPass=OWNER_PASS;
+let ownerPass=''; // loaded from DB only — never hardcoded
 let currentFilter='all';
+
+// ── SHA-256 HASHING ──
+async function hashPassword(plain){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(plain));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
 // ── LOADER ──
 function showLoader(msg){
@@ -944,7 +951,7 @@ async function loadFromSupabase(){
     ]);
     members=(m.data||[]).map(r=>({id:r.id,name:r.name,phone:r.phone,plan:r.plan,cardio:r.cardio,start:r.start_date,end:r.end_date,gender:r.gender,notes:r.notes,active:r.active,joined:r.joined}));
     payments=(p.data||[]).map(r=>({id:r.id,memberId:r.member_id,memberName:r.member_name,amount:r.amount,plan:r.plan,cardio:r.cardio,date:r.date}));
-    offers=(o.data||[]).map(r=>({id:r.id,title:r.title,desc:r.description,expiry:r.expiry,added:r.added}));
+    offers=(o.data||[]).filter(r=>r.title!=='__deleted__').map(r=>({id:r.id,title:r.title,desc:r.description,expiry:r.expiry,added:r.added}));
   }catch(e){console.error('Load error',e);toast('Connection error — check internet','error');}
   hideLoader();
 }
@@ -952,7 +959,7 @@ async function loadFromSupabase(){
 async function loadStaffAndSettings(){
   try{
     const [su,st]=await Promise.all([sb.from('staff_users').select('*'),sb.from('settings').select('*')]);
-    staffUsers=(su.data||[]).map(r=>({id:r.id,username:r.username,password:r.password,created:r.created,role:r.role}));
+    staffUsers=(su.data||[]).filter(r=>r.active!==false).map(r=>({id:r.id,username:r.username,password:r.password,created:r.created,role:r.role,active:r.active}));
     const op=(st.data||[]).find(s=>s.key==='owner_pass');
     if(op)ownerPass=op.value;
   }catch(e){console.error('Staff load error',e);}
@@ -964,13 +971,37 @@ async function saveMemberToDB(m,isNew){
   if(isNew)await sb.from('members').insert(row);
   else await sb.from('members').update(row).eq('id',m.id);
 }
-async function deleteFromDB(table,id){await sb.from(table).delete().eq('id',id);}
 async function savePaymentToDB(p){await sb.from('payments').insert({id:p.id,member_id:p.memberId,member_name:p.memberName,amount:p.amount,plan:p.plan,cardio:p.cardio,date:p.date});}
 async function saveOfferToDB(o){await sb.from('offers').insert({id:o.id,title:o.title,description:o.desc,expiry:o.expiry,added:o.added});}
-async function deleteOfferFromDB(id){await sb.from('offers').delete().eq('id',id);}
-async function saveStaffUserToDB(u){await sb.from('staff_users').upsert({id:u.id,username:u.username,password:u.password,created:u.created,role:u.role});}
-async function deleteStaffFromDB(id){await sb.from('staff_users').delete().eq('id',id);}
+// Offers: insert a new "deleted" marker row so we can hide it in UI — actual row stays in DB
+async function softDeleteOfferInDB(id){await sb.from('offers').update({title:'__deleted__'}).eq('id',id);}
+async function saveStaffUserToDB(u){await sb.from('staff_users').upsert({id:u.id,username:u.username,password:u.password,created:u.created,role:u.role,active:u.active!==false});}
+// Soft delete staff — just mark active=false, never hard delete
+async function softDeleteStaffInDB(id){await sb.from('staff_users').update({active:false}).eq('id',id);}
 async function saveOwnerPassToDB(pass){await sb.from('settings').upsert({key:'owner_pass',value:pass});}
+
+// ── RATE LIMITING ──
+const LOGIN_MAX=5, LOGIN_WINDOW=15*60*1000; // 5 attempts per 15 minutes
+function getRateData(){try{return JSON.parse(localStorage.getItem('sd_rate')||'{"count":0,"since":0}');}catch{return{count:0,since:0};}}
+function setRateData(d){localStorage.setItem('sd_rate',JSON.stringify(d));}
+function checkRateLimit(){
+  const now=Date.now(),d=getRateData();
+  if(now-d.since>LOGIN_WINDOW){setRateData({count:0,since:now});return true;}
+  if(d.count>=LOGIN_MAX){
+    const wait=Math.ceil((LOGIN_WINDOW-(now-d.since))/60000);
+    document.getElementById('login-err').textContent=`Too many attempts. Try again in ${wait} min.`;
+    return false;
+  }
+  return true;
+}
+function recordFailedAttempt(){
+  const now=Date.now(),d=getRateData();
+  if(now-d.since>LOGIN_WINDOW){setRateData({count:1,since:now});}
+  else{setRateData({count:d.count+1,since:d.since});}
+  const left=LOGIN_MAX-(getRateData().count);
+  if(left>0&&left<=3)document.getElementById('login-err').textContent=`Wrong username or password. ${left} attempt${left===1?'':'s'} left.`;
+}
+function resetRateLimit(){setRateData({count:0,since:0});}
 
 function save(){/* all saves go to Supabase directly */}
 
@@ -985,18 +1016,19 @@ function openLoginScreen(){document.getElementById('login-screen').classList.add
 function closeLoginScreen(){document.getElementById('login-screen').classList.remove('open');document.getElementById('login-err').textContent='';}
 
 async function doLogin(){
+  if(!checkRateLimit())return;
   const u=document.getElementById('login-user').value.trim();
   const p=document.getElementById('login-pass').value.trim();
-  // Load staff and settings first to check credentials
   showLoader('Signing in...');
   await loadStaffAndSettings();
   hideLoader();
-  if(u===OWNER_USER&&p===ownerPass){
-    currentRole='owner';
-  } else if(staffUsers.find(su=>su.username===u&&su.password===p)){
-    currentRole='staff';
+  const hashed=await hashPassword(p);
+  if(u===OWNER_USER&&hashed===ownerPass){
+    currentRole='owner';resetRateLimit();
+  } else if(staffUsers.find(su=>su.username===u&&su.password===hashed&&su.active!==false)){
+    currentRole='staff';resetRateLimit();
   } else {
-    document.getElementById('login-err').textContent='Wrong username or password';return;
+    recordFailedAttempt();return;
   }
   closeLoginScreen();
   document.getElementById('admin-app').classList.add('open');
@@ -1190,13 +1222,11 @@ async function toggleActive(id){
 }
 async function deleteMember(id){
   if(currentRole==='staff'){toast('Only owner can delete','error');return;}
-  if(!confirm('Delete this member?'))return;
-  const memberPayments=payments.filter(p=>p.memberId===id);
-  members=members.filter(m=>m.id!==id);
-  payments=payments.filter(p=>p.memberId!==id);
-  await deleteFromDB('members',id);
-  for(const p of memberPayments)await deleteFromDB('payments',p.id);
-  renderAll();toast('Deleted');
+  if(!confirm('Delete this member? They will be hidden but data stays safe in database.'))return;
+  const m=members.find(x=>x.id===id);if(!m)return;
+  m.active=false;
+  await saveMemberToDB(m,false);
+  renderAll();toast('Member removed ✓');
 }
 
 // ── EXTEND ──
@@ -1300,7 +1330,7 @@ async function saveOffer(){
 async function deleteOffer(i){
   const id=offers[i].id;
   offers.splice(i,1);
-  await deleteOfferFromDB(id);
+  await softDeleteOfferInDB(id);
   renderOffers();renderPublicOffers();toast('Offer removed');
 }
 
@@ -1388,9 +1418,7 @@ function renderStaffUsers(){
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
       <div>
         <div style="font-family:var(--font-d);font-size:18px;color:var(--yellow);letter-spacing:1px">${u.username}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px">Password: <span style="color:var(--white)" id="pw-${i}">••••••••</span>
-          <button class="act-btn" style="padding:3px 8px;margin-left:6px;font-size:10px" onclick="togglePw(${i},'${u.password}')">Show</button>
-        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">Password: <span style="color:var(--white)">••••••••</span> <span style="font-size:10px;color:#555">(secured)</span></div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Created: ${fmtDate(u.created)} · Role: Staff</div>
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
@@ -1412,7 +1440,8 @@ async function createStaffUser(){
   if(!uname||!upass){toast('Fill both fields','error');return;}
   if(upass.length<4){toast('Password min 4 characters','error');return;}
   if(staffUsers.find(u=>u.username===uname)){toast('Username already exists','error');return;}
-  const newUser={id:'su_'+Date.now(),username:uname,password:upass,created:today(),role:'staff'};
+  const hashedPass=await hashPassword(upass);
+  const newUser={id:'su_'+Date.now(),username:uname,password:hashedPass,created:today(),role:'staff'};
   staffUsers.push(newUser);
   await saveStaffUserToDB(newUser);
   document.getElementById('new-u-name').value='';
@@ -1432,7 +1461,7 @@ async function updateStaffPass(){
   const i=parseInt(document.getElementById('edit-u-index').value);
   const np=document.getElementById('edit-u-pass').value.trim();
   if(!np||np.length<4){toast('Password min 4 characters','error');return;}
-  staffUsers[i].password=np;
+  staffUsers[i].password=await hashPassword(np);
   await saveStaffUserToDB(staffUsers[i]);
   closeModal('edit-user-modal');
   renderStaffUsers();
@@ -1440,12 +1469,12 @@ async function updateStaffPass(){
 }
 
 async function deleteStaffUser(i){
-  if(!confirm('Delete user "'+staffUsers[i].username+'"?'))return;
+  if(!confirm('Remove user "'+staffUsers[i].username+'"? They will no longer be able to login.'))return;
   const uid=staffUsers[i].id;
   staffUsers.splice(i,1);
-  await deleteStaffFromDB(uid);
+  await softDeleteStaffInDB(uid);
   renderStaffUsers();
-  toast('User deleted');
+  toast('User removed ✓');
 }
 
 // ── OWNER PASSWORD CHANGE ──
@@ -1453,10 +1482,11 @@ async function changeOwnerPass(){
   const cur=document.getElementById('owner-cur-pass').value.trim();
   const np=document.getElementById('owner-new-pass').value.trim();
   const cp=document.getElementById('owner-confirm-pass').value.trim();
-  if(cur!==ownerPass){toast('Current password is wrong','error');return;}
+  const hashedCur=await hashPassword(cur);
+  if(hashedCur!==ownerPass){toast('Current password is wrong','error');return;}
   if(np.length<6){toast('New password min 6 characters','error');return;}
   if(np!==cp){toast('Passwords do not match','error');return;}
-  ownerPass=np;
+  ownerPass=await hashPassword(np);
   await saveOwnerPassToDB(ownerPass);
   document.getElementById('owner-cur-pass').value='';
   document.getElementById('owner-new-pass').value='';
